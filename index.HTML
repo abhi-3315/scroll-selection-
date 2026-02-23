@@ -1,145 +1,329 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kirloskar Chiller Selection Software</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- PDF Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kirloskar Chiller – notes & RLA right aligned</title>
+<style>
+:root {
+    --navy: #1a2a5e;
+    --border: #222;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <style>
-        :root { --navy: #003366; --teal: #00818a; --light-bg: #f4f7f9; --border: #000; }
-        body { font-family: 'Poppins', sans-serif; background: var(--light-bg); padding: 20px; color: #333; font-size: 11px; }
-        
-        .selection-box { 
-            background: white; max-width: 750px; margin: 0 auto 30px; padding: 35px; border-radius: 20px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); border-top: 8px solid var(--navy);
-        }
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-        .input-group label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--navy); }
-        input, select { width: 100%; padding: 12px; border: 2px solid #e1e8ef; border-radius: 10px; font-size: 13px; box-sizing: border-box; }
-        
-        .gen-btn { 
-            width: 100%; padding: 18px; background: linear-gradient(45deg, var(--navy), var(--teal));
-            color: white; border: none; border-radius: 10px; cursor: pointer; margin-top: 25px;
-            font-weight: 700; font-size: 16px; text-transform: uppercase; display: none;
-        }
-        .visible { display: block; }
-        .hide-form { display: none; }
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #fff;
+    padding: 8px;
+    color: #000;
+}
 
-        .btn-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
-        .dl-btn, .back-btn { width: 180px; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; color: white; transition: 0.3s; }
-        .dl-btn { background: linear-gradient(45deg, var(--navy), var(--teal)); }
-        .back-btn { background: #6c757d; }
+/* input panel */
+.selection-box {
+    background: #f9f9f9; max-width: 800px; margin: 0 auto 20px;
+    padding: 20px; border-radius: 8px; border: 1px solid #ddd;
+}
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.input-group label { display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; }
+input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; }
+.gen-btn { 
+    width: 100%; padding: 12px; background: var(--navy); color: white; 
+    border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px;
+}
 
-        .report-wrapper { width: 100%; max-width: 850px; margin: 0 auto; padding: 10px; }
-        .report-container { background: white; padding: 15px; border-radius: 4px; }
+/* report panel */
+.report-wrapper { max-width: 900px; margin: 0 auto; display: none; background: #fff; }
+.report-container {
+    background: #fff; padding: 6px 10px;
+    border: 1.5px solid #000;
+    width: 210mm; 
+    margin: 0 auto;
+}
 
-        /* HEADER STYLING */
-        .report-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 10px; 
-            padding-bottom: 10px; 
-            border-bottom: 2px solid var(--navy); 
-        }
-        .logo-box img {
-            max-height: 45px; 
-            width: auto;
-        }
-        
-        .section-title { 
-            background: var(--navy); 
-            color: white; 
-            text-align: center; 
-            padding: 6px 4px; 
-            font-size: 9px; 
-            font-weight: bold; 
-            text-transform: uppercase; 
-            border: 1px solid var(--navy); 
-            margin-top: -1px; 
-            width: calc(100% - 2px); 
-            margin-left: 1px; 
-            box-sizing: border-box; 
-        }
+.header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; }
+.comp-name { font-weight: bold; font-size: 14px; }
+.logo-img { font-size: 22px; font-weight: bold; color: #00918e; text-align: right; line-height: 1; }
+.logo-img span { color: #333; font-size: 12px; display: block; font-weight: normal; }
 
-        table { width: calc(100% - 2px); border-collapse: collapse; margin-bottom: 0; table-layout: fixed; border: 1px solid var(--border); margin-left: 1px; box-sizing: border-box; }
-        th, td { border: none; padding: 3px 5px; font-size: 8px; }
-        
-        td.main-cell { border-right: 1px solid var(--border); padding: 0; vertical-align: top !important; } 
-        
-        .perf-table th, .perf-table td { border: 1px solid var(--border); padding: 3px; text-align: center; font-size: 8px; }
-        .sub-header { background-color: #f1f3f5; font-weight: bold; }
+.version-info { font-size: 10px; font-weight: bold; margin-bottom: 3px; }
 
-        .label-cell { font-weight: bold; width: 22%; border-right: 1px solid var(--border); }
-        .value-cell { width: 28%; border-right: 1px solid var(--border); }
+/* tables */
+table { width: 100%; border-collapse: collapse; margin-bottom: -1px; table-layout: fixed; border: 1.5px solid var(--border); }
+th, td { 
+    border: none; padding: 3px 5px;
+    font-size: 9.5px;
+    font-weight: bold; 
+    vertical-align: middle;
+    line-height: 1.2;
+}
+.report-container > table tr,
+#efficiency-table tr,
+#physical-table tr {
+    min-height: 22px;
+    height: 22px;
+}
 
-        .inner-table { width: 100%; border: none; margin: 0; border-spacing: 0; border-collapse: collapse; }
-        .inner-table td { border: none !important; padding: 2px 6px; vertical-align: top; }
-        .bold { font-weight: bold; }
+.section-header {
+    background: var(--navy) !important; color: white !important;
+    text-align: center; font-weight: bold; padding: 4px 2px;
+    font-size: 9.5px;
+    text-transform: uppercase; border: 1.5px solid var(--border);
+    letter-spacing: 0.3px;
+}
 
-        .notes-box { border: 1px solid var(--border); border-top: none; min-height: 60px; margin-left: 1px; width: calc(100% - 2px); box-sizing: border-box; padding: 8px; font-weight: bold; font-size: 9px; }
+.label-cell { background: #ffffff; width: 22%; }
 
-        @media print { .btn-container { display: none; } .report-wrapper { padding: 0; } }
-    </style>
+.bordered-table th, .bordered-table td {
+    border: 1px solid var(--border) !important;
+    text-align: center;
+    height: 22px;
+}
+
+/* inner tables (rated performance) */
+.inner-table { width: 100%; border: none !important; }
+.inner-table td { 
+    border: none !important; 
+    padding: 2px 8px 2px 5px;   
+    min-height: 22px; 
+    height: 22px;
+}
+.inner-table td:last-child {
+    text-align: right;
+    padding-right: 10px;
+}
+.inner-table td:first-child {
+    text-align: left;
+    padding-left: 5px;
+}
+
+/* RLA block inside efficiency – force all value cells to right */
+#efficiency-table .inner-table td {
+    text-align: left;  /* keep label left */
+}
+#efficiency-table .inner-table td:last-child {
+    text-align: right; /* RLA numbers to the right */
+    padding-right: 12px;
+}
+/* also the containing cell with nested table */
+#efficiency-table td.v-sep table.inner-table td:last-child {
+    text-align: right;
+}
+
+/* vertical separator – strong */
+.v-sep { border-left: 2px solid var(--border) !important; }
+
+/* action buttons */
+.btn-bar { display: flex; justify-content: center; gap: 15px; margin-bottom: 8px; }
+.print-btn { background: #28a745; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; }
+.back-btn { background: #6c757d; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; }
+
+/* performance table column widths */
+.perf-table th, .perf-table td { font-size: 8.5px; padding: 2px 1px; height: 21px; }
+.perf-table col.col-pt    { width: 3%; }
+.perf-table col.col-load  { width: 6%; }
+.perf-table col.col-cap   { width: 8%; }
+.perf-table col.col-pwr   { width: 7%; }
+.perf-table col.col-cop   { width: 7%; }
+.perf-table col.col-rla   { width: 6%; }
+.perf-table col.col-flow  { width: 7%; }
+.perf-table col.col-tin   { width: 6%; }
+.perf-table col.col-tout  { width: 6%; }
+.perf-table col.col-pd    { width: 6%; }
+.perf-table col.col-amb   { width: 13%; }
+
+/* NOTES – exactly as requested (default note visible) */
+#notes-area {
+    border: 2px solid var(--border); 
+    padding: 14px 12px;               
+    font-size: 10.5px; 
+    font-weight: bold; 
+    min-height: 70px;
+    line-height: 1.5;
+    background: #fefefa;
+}
+
+/* print tuning – single A4 */
+@media print {
+    body { background: white; padding: 0; margin: 0; }
+    .btn-bar, .selection-box { display: none !important; }
+    .report-wrapper { display: block !important; }
+    .report-container { border: none; padding: 3mm 4mm; width: 100%; margin: 0; }
+    @page { size: A4; margin: 4mm 5mm; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+</style>
 </head>
 <body>
 
-    <div class="selection-box" id="selection-form">
-        <h2 style="text-align:center; color:var(--navy); margin-top:0;">Chiller Selection Software</h2>
-        <div class="grid">
-            <div class="input-group"><label>Client Name</label><input type="text" id="client" placeholder="Enter Client Name"></div>
-            <div class="input-group"><label>Project Name</label><input type="text" id="project" placeholder="Enter Project Name"></div>
-            <div class="input-group">
-                <label>Model Name</label>
-                <select id="model-select">
-                    <option value="">Select Model...</option>
-                    <option value="KAC011">KAC011.20</option>
-                    <option value="KAC022">KAC022.20</option>
-                    <option value="KAC044">KAC044.20</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label>Test Condition</label>
-                <select id="condition-select">
-                    <option value="">Select Condition...</option>
-                    <option value="AHRI">AHRI Condition</option>
-                    <option value="BEE">BEE Condition</option>
-                </select>   
-            </div>
+<div class="selection-box" id="selection-form">
+    <div style="text-align:center; color:var(--navy); margin-bottom:15px;"><h2>Kirloskar Selection Tool</h2></div>
+    <div class="grid">
+        <div class="input-group"><label>Client Name</label><input type="text" id="client" value="000 Practice"></div>
+        <div class="input-group"><label>Project Name</label><input type="text" id="project" value="123"></div>
+        <div class="input-group"><label>Project Incharge</label><input type="text" id="proj-incharge" value=""></div>
+        <div class="input-group"><label>Model</label>
+            <select id="model-select">
+                <option value="KAC011">KAC011.20</option>
+                <option value="KAC022">KAC022.20</option>
+                <option value="KAC044">KAC044.20</option>
+            </select>
         </div>
-        <button id="gen-btn" class="gen-btn" onclick="generateReport()">Generate Selection Report</button>
-    </div>
-
-    <div id="output-wrapper" class="report-wrapper" style="display: none;">
-        <div class="btn-container">
-            <button class="back-btn" onclick="goBack()">← Back to Selection</button>
-            <button class="dl-btn" onclick="downloadPDF()">Download Official PDF</button>
-        </div>
-        
-        <div id="report-content" class="report-container">
-            <div class="report-header">
-                <div>
-                    <strong style="font-size: 14px;">KIRLOSKAR CHILLERS PRIVATE LIMITED</strong><br>
-                    A Kirloskar Group Company<br>
-                    Selection Software | Version: 1.0.0
-                </div>
-                <div class="logo-box" style="text-align: right;">
-                <img src="data:image/png;base64,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" alt="Kirloskar Logo"><br>
-                <span id="print-date" style="font-size: 9px; display: block; margin-top: 5px;"></span>
-                </div>
-            </div>
-            <div id="report-body"></div>
-            <div class="section-title">NOTES</div>
-            <div class="notes-box"></div>
+        <div class="input-group"><label>Condition</label>
+            <select id="cond-select">
+                <option value="BEE">BEE Condition</option>
+                <option value="AHRI">AHRI Condition</option>
+            </select>
         </div>
     </div>
+    <button class="gen-btn" onclick="generateReport()">VIEW OFFICIAL REPORT</button>
+</div>
 
-    <script>
-        const csvData = `Model,Condition,ModelName,NumCompressors,Refrigerant,NumFans,NumCoils,FlowDesign,FF,Alt,Passes,Mat,WB,L1,W1,H1,SW1,OW1,RC1,L2,W2,H2,RC2,SW2,OW2,OilCh,CompRLA1,CompRLA2,CompRLA3,CompRLA4,ResultVal,C100,P100,COP100,RLA100,F100,EI100,EO100,PD100,AM100,C75,P75,COP75,RLA75,F75,EI75,EO75,PD75,AM75,C50,P50,COP50,RLA50,F50,EI50,EO50,PD50,AM50,C25,P25,COP25,RLA25,F25,EI25,EO25,PD25,AM25,Elev_C,Elev_P,Elev_COP,Elev_RLA,Elev_F,Elev_EI,Elev_EO,Elev_PD,Elev_AM
+<div class="report-wrapper" id="report-wrapper">
+    <div class="btn-bar">
+        <button class="back-btn" onclick="goBack()">← BACK TO EDIT</button>
+        <button class="print-btn" onclick="window.print()">⬇ DOWNLOAD PDF</button>
+    </div>
+
+    <div class="report-container">
+        <div class="header-top">
+            <div>
+                <div class="comp-name">KIRLOSKAR CHILLERS PRIVATE LIMITED</div>
+                <div style="font-size:10px;">A Kirloskar Group Company</div>
+            </div>
+            <div class="logo-img">kirloskar<span>Chillers</span></div>
+        </div>
+
+        <div class="version-info">
+            Version : 1.0.0 | Release Date: 2026/02/1
+            <div style="float:right">Print Date: <span id="p-date"></span></div>
+        </div>
+
+        <!-- PROJECT DETAILS -->
+        <div class="section-header">PROJECT DETAILS</div>
+        <table style="border-bottom:none;">
+            <colgroup><col style="width:22%"><col style="width:28%"><col style="width:22%"><col style="width:28%"></colgroup>
+            <tr>
+                <td class="label-cell">Client</td>
+                <td class="v-sep" id="d-client"></td>
+                <td class="label-cell v-sep">Appliance/Type</td>
+                <td class="v-sep">Air Cooled Chiller</td>
+            </tr>
+            <tr>
+                <td class="label-cell">Project Name</td><td class="v-sep" id="d-project"></td>
+                <td class="label-cell v-sep">Cooling Technology</td>
+                <td class="v-sep">Scroll</td>
+            </tr>
+            <tr>
+                <td class="label-cell">Project Incharge</td><td class="v-sep" id="d-incharge"></td>
+                <td class="label-cell v-sep">Brand</td><td class="v-sep">Kirloskar Chillers</td>
+            </tr>
+            <tr>
+                <td class="label-cell">Model</td><td class="v-sep" id="d-model-name"></td>
+                <td class="label-cell v-sep">Compressor Type</td><td class="v-sep">Fixed Speed</td>
+            </tr>
+            <tr id="bmg-row">
+                <td class="label-cell">BMG</td><td class="v-sep" id="d-bmg">BMGA8</td>
+                <td class="label-cell v-sep">Starter Type</td><td class="v-sep">Star Delta</td>
+            </tr>
+            <tr id="starter-row-ahri" style="display:none;">
+                <td class="label-cell">Starter Type</td><td class="v-sep">Star Delta</td>
+                <td class="label-cell v-sep"></td><td class="v-sep"></td>
+            </tr>
+        </table>
+
+        <!-- RATED PERFORMANCE -->
+        <div class="section-header" id="d-rating-hdr">RATED PERFORMANCE AT STANDARD RATING CONDITIONS AS PER TABLE 1, IS 16590 : 2023</div>
+        <table style="border-bottom:none;">
+            <tr>
+                <th style="border-bottom:1.5px solid var(--border);">Compressor</th>
+                <th class="v-sep" style="border-bottom:1.5px solid var(--border);">Evaporator</th>
+                <th class="v-sep" style="border-bottom:1.5px solid var(--border);">Air Cooled Condenser</th>
+            </tr>
+            <tr>
+                <td style="padding:0; vertical-align:top;"><table class="inner-table" id="comp-data"></table></td>
+                <td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table" id="evap-data"></table></td>
+                <td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table" id="cond-data"></table></td>
+            </tr>
+        </table>
+
+        <!-- EFFICIENCY DATA -->
+        <div class="section-header" id="d-eff-hdr">INDIAN SEASONAL ENERGY EFFICIENCY RATIO (ISEER) AS PER ANNEX C, IS 16590 : 2023</div>
+        <table id="efficiency-table" style="border-bottom:none;"></table>
+
+        <!-- PERFORMANCE DETAILS -->
+        <div class="section-header" id="d-perf-hdr">PERFORMANCE DETAILS</div>
+        <table class="perf-table bordered-table" style="border-bottom:none;">
+            <colgroup>
+                <col class="col-pt"><col class="col-load">
+                <col class="col-cap"><col class="col-pwr"><col class="col-cop"><col class="col-rla">
+                <col class="col-flow"><col class="col-tin"><col class="col-tout"><col class="col-pd"><col class="col-amb">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th rowspan="2">Pt</th>
+                    <th rowspan="2">% Load</th>
+                    <th rowspan="2">Capacity<br>(kW)</th>
+                    <th rowspan="2">Power<br>(kW)</th>
+                    <th rowspan="2">COP<br>(kW/kW)</th>
+                    <th rowspan="2">RLA<br>(A)</th>
+                    <th colspan="4">Evaporator</th>
+                    <th colspan="1">Air Cooled Condenser</th>
+                </tr>
+                <tr>
+                    <th>Flow<br>(m³/h)</th>
+                    <th>T in<br>(°C)</th>
+                    <th>T out<br>(°C)</th>
+                    <th>Pd<br>(kPa)</th>
+                    <th>Ambient<br>Temp (°C)</th>
+                </tr>
+            </thead>
+            <tbody id="perf-body"></tbody>
+        </table>
+
+        <!-- ELEVATED TEMP (BEE only) -->
+        <div class="section-header" id="elevated-hdr">PERFORMANCE DETAILS AT ELEVATED TEMPERATURE</div>
+        <div id="elevated-section">
+        <table class="perf-table bordered-table" style="border-bottom:none;">
+            <colgroup>
+                <col class="col-pt"><col class="col-load">
+                <col class="col-cap"><col class="col-pwr"><col class="col-cop"><col class="col-rla">
+                <col class="col-flow"><col class="col-tin"><col class="col-tout"><col class="col-pd"><col class="col-amb">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th rowspan="2">Pt</th>
+                    <th rowspan="2">% Load</th>
+                    <th rowspan="2">Capacity<br>(kW)</th>
+                    <th rowspan="2">Power<br>(kW)</th>
+                    <th rowspan="2">COP<br>(kW/kW)</th>
+                    <th rowspan="2">RLA<br>(A)</th>
+                    <th colspan="4">Evaporator</th>
+                    <th colspan="1">Air Cooled Condenser</th>
+                </tr>
+                <tr>
+                    <th>Flow<br>(m³/h)</th>
+                    <th>T in<br>(°C)</th>
+                    <th>T out<br>(°C)</th>
+                    <th>Pd<br>(kPa)</th>
+                    <th>Ambient<br>Temp (°C)</th>
+                </tr>
+            </thead>
+            <tbody id="elevated-perf-body"></tbody>
+        </table>
+        </div>
+
+        <!-- PHYSICAL DATA -->
+        <div class="section-header">MOTOR AND PHYSICAL DATA</div>
+        <table id="physical-table"></table>
+
+        <!-- NOTES – exactly as required (default note, no extra text) -->
+        <div class="section-header">NOTES</div>
+        <div id="notes-area"></div>
+    </div>
+</div>
+
+<script>
+const csvData = `Model,Condition,ModelName,NumCompressors,Refrigerant,NumFans,NumCoils,FlowDesign,FF,Alt,Passes,Mat,WB,L1,W1,H1,SW1,OW1,RC1,L2,W2,H2,RC2,SW2,OW2,OilCh,CompRLA1,CompRLA2,CompRLA3,CompRLA4,ResultVal,C100,P100,COP100,RLA100,F100,EI100,EO100,PD100,AM100,C75,P75,COP75,RLA75,F75,EI75,EO75,PD75,AM75,C50,P50,COP50,RLA50,F50,EI50,EO50,PD50,AM50,C25,P25,COP25,RLA25,F25,EI25,EO25,PD25,AM25,Elev_C,Elev_P,Elev_COP,Elev_RLA,Elev_F,Elev_EI,Elev_EO,Elev_PD,Elev_AM
 KAC011,BEE,KAC011.20,2,R410A,2,2,6.15,0.018,0,1,Cu,NA,1721,1140,1469,436,561,11,2071,949,1436,11,436,561,NA,11.1,11.1,NA,NA,3.38,36.66,12.7,2.89,22.2,6.15,12.0,7.0,1.0,35.0,27.495,10.31,2.67,19.046,6.15,10.75,7.0,1.0,27.0,18.33,4.05,4.53,8.487,6.15,9.50,7.0,1.0,19.0,9.165,3.09,2.97,7.849,6.15,8.25,7.0,1.0,13.0,36.660,12.70,2.89,22.2,6.15,12,7,1,39
 KAC011,AHRI,KAC011.20,2,R410A,2,2,6.15,0.018,0,1,Cu,NA,1721,1140,1469,436,561,11,2071,949,1436,11,436,561,NA,11.1,11.1,NA,NA,3.33,36.66,12.7,2.89,22.2,6.15,12.0,7.0,1.0,35.0,27.495,10.31,2.67,19.046,6.15,10.75,7.0,1.0,27.0,18.33,4.048,4.53,8.487,6.15,9.50,7.0,1.0,19.0,9.165,3.087,2.97,7.849,6.15,8.25,7.0,1.0,13.0,36.660,12.70,2.89,22.2,6.15,12,7,1,39
 KAC022,BEE,KAC022.20,2,R410A,2,2,13.83,0.018,0,1,Cu,NA,2121,1400,1864,598,630,16,2570,1092,1869,16,598,630,NA,22.94,22.94,NA,NA,3.40,80.34,24.96,3.00,45.88,13.83,12.0,7.0,4.0,35.0,60.255,20.16,2.74,40.2,13.83,10.75,7.0,4.0,27.0,40.17,8.02,4.50,18.31,13.83,9.50,7.0,4.0,19.0,20.085,6.16,2.85,17.36,13.83,8.25,7.0,4.0,13.0,80.340,24.96,3.00,45.88,13.83,12,7,4,39
@@ -147,203 +331,213 @@ KAC022,AHRI,KAC022.20,2,R410A,2,2,13.83,0.018,0,1,Cu,NA,2121,1400,1864,598,630,1
 KAC044,BEE,KAC044.20,4,R410A,2,4,27.67,0.018,0,1,Cu,NA,3093,1574,2189,1455,1560,44,3093,1574,2189,44,1455,1560,NA,22.94,22.94,22.94,22.94,3.91,160.68,49.92,2.96,91.76,27.67,12.0,7.0,13.0,35.0,120.51,30.24,3.48,60.3,27.67,10.75,7.0,13.0,27.0,80.34,16.04,4.41,36.62,27.67,9.50,7.0,13.0,19.0,40.17,6.16,4.81,17.36,27.67,8.25,7.0,13.0,13.0,160.680,49.92,2.96,91.76,27.67,12,7,13,39
 KAC044,AHRI,KAC044.20,4,R410A,2,4,27.67,0.018,0,1,Cu,NA,3093,1574,2189,1455,1560,44,3093,1574,2189,44,1455,1560,NA,22.94,22.94,22.94,22.94,3.98,160.68,49.92,2.96,91.76,27.67,12.0,7.0,13.0,35.0,120.51,30.24,3.48,60.3,27.67,10.75,7.0,13.0,27.0,80.34,16.04,4.41,36.62,27.67,9.50,7.0,13.0,19.0,40.17,6.16,4.81,17.36,27.67,8.25,7.0,13.0,13.0,160.680,49.92,2.96,91.76,27.67,12,7,13,39`;
 
-        let chillerData = [];
+const BEE_STAR_LABELS = {
+    'KAC011': '2 Star',
+    'KAC022': '2 Star',
+    'KAC044': '3 Star'
+};
 
-        function parseData() {
-            const rows = csvData.trim().split('\n');
-            const headers = rows[0].split(',');
-            chillerData = rows.slice(1).map(r => {
-                let vals = r.split(',');
-                let obj = {};
-                headers.forEach((h, i) => obj[h.trim()] = vals[i] ? vals[i].trim() : "NA");
-                return obj;
-            });
-        }
+function fmt2(val) {
+    let n = parseFloat(val);
+    if (isNaN(n)) return val;
+    return n.toFixed(2);
+}
 
-        function validate() {
-            if(document.getElementById('model-select').value && document.getElementById('condition-select').value) 
-                document.getElementById('gen-btn').classList.add('visible');
-        }
+let db = [];
+function parseCSV() {
+    const lines = csvData.trim().split('\n');
+    const headers = lines[0].split(',');
+    db = lines.slice(1).map(l => {
+        const v = l.split(',');
+        let o = {};
+        headers.forEach((h, i) => o[h] = v[i]);
+        return o;
+    });
+}
+parseCSV();
 
-        function goBack() {
-            document.getElementById('output-wrapper').style.display = 'none';
-            document.getElementById('selection-form').classList.remove('hide-form');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+function goBack() {
+    document.getElementById('report-wrapper').style.display = 'none';
+    document.getElementById('selection-form').style.display = 'block';
+}
 
-        function generateReport() {
-            const m = document.getElementById('model-select').value;
-            const c = document.getElementById('condition-select').value;
-            let d = chillerData.find(x => x.Model === m && x.Condition === c);
-            if(!d) return;
+function generateReport() {
+    const mod = document.getElementById('model-select').value;
+    const con = document.getElementById('cond-select').value;
+    const d = db.find(x => x.Model === mod && x.Condition === con);
+    if(!d) return;
 
-            document.getElementById('selection-form').classList.add('hide-form');
-            document.getElementById('print-date').innerText = "Release Date: " + new Date().toLocaleDateString('en-GB');
-            document.getElementById('output-wrapper').style.display = 'block';
+    document.getElementById('selection-form').style.display = 'none';
+    document.getElementById('report-wrapper').style.display = 'block';
+    document.getElementById('p-date').innerText = new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
 
-            // --- LOGIC FOR ASTERISKS AND NOTE ---
-            let isLimited = (c === 'BEE' && (m === 'KAC011' || m === 'KAC022'));
-            let ast = isLimited ? '*' : ''; // This adds the * character
-            let noteText = isLimited ? " *Physically chiller cannot be unloaded at this condition" : "";
+    document.getElementById('d-client').innerText = document.getElementById('client').value;
+    document.getElementById('d-project').innerText = document.getElementById('project').value;
+    document.getElementById('d-incharge').innerText = document.getElementById('proj-incharge').value || '—';
+    document.getElementById('d-model-name').innerText = d.ModelName;
 
-            let ratedHeader, efficiencyHeader, performanceHeader;
-            if (c === 'AHRI') {
-                ratedHeader = "Job Conditions in accordance with AHRI-551/591 (SI)";
-                efficiencyHeader = "Part Load Data with AHRI-Relief";
-                performanceHeader = "Performance Details At AHRI Relief Load Points";
-            } else {
-                ratedHeader = "RATED PERFORMANCE AT STANDARD RATING CONDITIONS AS PER TABLE 1, IS 16590 : 2023";
-                efficiencyHeader = "INDIAN SEASONAL ENERGY EFFICIENCY RATIO (ISEER) AS PER ANNEX C, IS 16590 : 2023";
-                performanceHeader = "PERFORMANCE DETAILS";
-            }
+    if (con === 'BEE') {
+        document.getElementById('d-bmg').innerText = 'BMGA8';
+        document.getElementById('bmg-row').style.display = '';
+        document.getElementById('starter-row-ahri').style.display = 'none';
+    } else {
+        document.getElementById('bmg-row').style.display = 'none';
+        document.getElementById('starter-row-ahri').style.display = '';
+    }
 
-            const ratingLabel = (c === 'AHRI') ? 'IPLV (kW/kW)' : 'ISEER (kWh/kWh)';
-            let starRatingRow = '';
-            let bmgCells = (c === 'AHRI') ? `<td class="label-cell">Brand</td><td>Kirloskar Chillers</td>` : '';
-            
-            if (c === 'BEE') {
-                const starVal = (m === 'KAC044') ? '3 Star' : '2 Star';
-                starRatingRow = `<tr><td class="bold">BEE Star Rating</td><td>${starVal}</td></tr>`;
-                const bmgVal = (m === 'KAC044') ? 'BMGA3' : 'BMGA2';
-                bmgCells = `<td class="label-cell">BMG</td><td>${bmgVal}</td>`;
-            }
+    if(con === 'AHRI') {
+        document.getElementById('d-rating-hdr').innerText = "Job Conditions in accordance with AHRI-551/591 (SI)";
+        document.getElementById('d-eff-hdr').innerText = "Part Load Data with AHRI-Relief";
+        document.getElementById('d-perf-hdr').innerText = "Performance Details At AHRI Relief Load Points";
+    } else {
+        document.getElementById('d-rating-hdr').innerText = "RATED PERFORMANCE AT STANDARD RATING CONDITIONS AS PER TABLE 1, IS 16590 : 2023";
+        document.getElementById('d-eff-hdr').innerText = "INDIAN SEASONAL ENERGY EFFICIENCY RATIO (ISEER) AS PER ANNEX C, IS 16590 : 2023";
+        document.getElementById('d-perf-hdr').innerText = "PERFORMANCE DETAILS";
+    }
 
-            let rlaHtml = `
-                <tr><td class="bold">Total RLA (A)</td><td>${d.RLA100}</td></tr>
-                <tr><td class="bold">RLA Compressor 1 (A)</td><td>${d.CompRLA1}</td></tr>
-                <tr><td class="bold">RLA Compressor 2 (A)</td><td>${d.CompRLA2}</td></tr>
-                <tr><td class="bold">RLA Compressor 3 (A)</td><td>${d.CompRLA3}</td></tr>
-                <tr><td class="bold">RLA Compressor 4 (A)</td><td>${d.CompRLA4}</td></tr>
-            `;
-            
-            let elevatedSection = (c === 'BEE') ? `
-                <div class="section-title">PERFORMANCE AT ELEVATED TEMPERATURE</div>
-                <table class="perf-table">
-                    <tr>
-                        <th rowspan="2">Pt</th><th rowspan="2">% Load</th><th rowspan="2">Cap (kW)</th><th rowspan="2">Power (kW)</th><th rowspan="2">COP (kW/kW)</th><th rowspan="2">RLA (A)</th>
-                        <th colspan="4" class="sub-header">Evaporator</th><th class="sub-header">Air Cooled Condenser</th>
-                    </tr>
-                    <tr><th>Flow (m³/h)</th><th>T In (°C)</th><th>T Out (°C)</th><th>Pd (kPa)</th><th>Amb Temp (°C)</th></tr>
-                    <tr><td>1</td><td>100</td><td>${d.Elev_C}</td><td>${d.Elev_P}</td><td>${d.Elev_COP}</td><td>${d.Elev_RLA}</td><td>${d.Elev_F}</td><td>12.0</td><td>7.0</td><td>${d.Elev_PD}</td><td class="bold">${d.Elev_AM}</td></tr>
-                </table>` : "";
+    document.getElementById('comp-data').innerHTML = `
+        <tr><td>No. of Compressors</td><td>${d.NumCompressors}</td></tr>
+        <tr><td>Hertz</td><td>50.0 Hz</td></tr>
+        <tr><td>Volts</td><td>415 V</td></tr>
+        <tr><td>Refrigerant</td><td>${d.Refrigerant}</td></tr>
+    `;
 
-            document.getElementById('report-body').innerHTML = `
-                <div class="section-title">PROJECT DETAILS</div>
-                <table>
-                    <tr><td class="label-cell">Brand</td><td class="value-cell">Kirloskar Chillers</td><td class="label-cell">Appliance Type</td><td>Air Cooled Chiller</td></tr>
-                    <tr><td class="label-cell">Client</td><td class="value-cell">${document.getElementById('client').value || 'N/A'}</td><td class="label-cell">Cooling Technology</td><td>Scroll</td></tr>
-                    <tr><td class="label-cell">Project Name</td><td class="value-cell">${document.getElementById('project').value || 'N/A'}</td><td class="label-cell">Compressor Type</td><td>Fixed speed</td></tr>
-                    <tr><td class="label-cell">Model</td><td class="value-cell">${d.ModelName}</td>${bmgCells}</tr>
-                    <tr><td class="label-cell">Starter Type</td><td class="value-cell">Star Delta</td><td class="label-cell">Voltage/Hertz</td><td>415V / 50Hz</td></tr>
+    document.getElementById('evap-data').innerHTML = `
+        <tr><td>Flow (m³/h)</td><td>${fmt2(d.FlowDesign)}</td></tr>
+        <tr><td>Entering Temp (°C)</td><td>12.00</td></tr>
+        <tr><td>Leaving Temp (°C)</td><td>7.00</td></tr>
+        <tr><td>No. of Passes</td><td>${d.Passes}</td></tr>
+        <tr><td>FoulingFactor(m².K/kW)</td><td>${d.FF}</td></tr>
+        <tr><td>Pressure Drop (kPa)</td><td>${fmt2(d.PD100)}</td></tr>
+        <tr><td>Tube Material</td><td>Cu</td></tr>
+    `;
+
+    document.getElementById('cond-data').innerHTML = `
+        <tr><td>Ambient Temp (°C)</td><td>${fmt2(d.AM100)}</td></tr>
+        <tr><td>No. of Coils</td><td>${d.NumCoils}</td></tr>
+        <tr><td>No. of Fans</td><td>${d.NumFans}</td></tr>
+        <tr><td>Altitude (m)</td><td>${d.Alt}</td></tr>
+    `;
+
+    const effLabel = (con === 'BEE') ? "ISEER" : "IPLV";
+    const starLabel = (con === 'BEE') ? (BEE_STAR_LABELS[mod] || '3 Star') : '';
+
+    let rlaRows = '';
+    [1,2,3,4].forEach(i => {
+        let val = d['CompRLA' + i];
+        let display = (val && val.trim() !== 'NA' && val.trim() !== '') ? fmt2(val) : 'NA';
+        rlaRows += `<tr><td style="background:#ffffff; width:65%;">RLA Comp ${i} (A)</td><td>${display}</td></tr>`;
+    });
+
+    const starRow = (con === 'BEE') ? `<tr><td class="label-cell">BEE Star Rating</td><td>${starLabel}</td><td class="label-cell v-sep"></td><td></td></tr>` : '';
+
+    document.getElementById('efficiency-table').innerHTML = `
+        <tr>
+            <td class="label-cell">Cooling Capacity (kW)</td><td>${fmt2(d.C100)}</td>
+            <td class="label-cell v-sep">75% Load COP</td><td>${fmt2(d.COP75)}</td>
+            <td class="label-cell v-sep">Total RLA (A)</td><td>${fmt2(d.RLA100)}</td>
+        </tr>
+        <tr>
+            <td class="label-cell">Power Input (kW)</td><td>${fmt2(d.P100)}</td>
+            <td class="label-cell v-sep">50% Load COP</td><td>${fmt2(d.COP50)}</td>
+            <td rowspan="3" colspan="2" class="v-sep" style="padding:0; vertical-align:top;">
+                <table class="inner-table">${rlaRows}</table>
+            </td>
+        </tr>
+        <tr>
+            <td class="label-cell">COP (kW/kW)</td><td>${fmt2(d.COP100)}</td>
+            <td class="label-cell v-sep">25% Load COP</td><td>${fmt2(d.COP25)}</td>
+        </tr>
+        <tr>
+            <td class="label-cell">${effLabel}</td><td>${fmt2(d.ResultVal)}</td>
+            <td class="label-cell v-sep">${con === 'BEE' ? 'BEE Star Rating' : ''}</td>
+            <td>${con === 'BEE' ? starLabel : ''}</td>
+        </tr>
+        ${starRow}
+    `;
+
+    const needsStar = (con === 'BEE' && (mod === 'KAC011' || mod === 'KAC022'));
+
+    const pts = [
+        {id:1, lp:100, c:d.C100, p:d.P100, cop:d.COP100, rla:d.RLA100, f:d.F100,  tin:d.EI100, tout:d.EO100, pd:d.PD100, amb:d.AM100},
+        {id:2, lp:75,  c:d.C75,  p:d.P75,  cop:d.COP75,  rla:d.RLA75,  f:d.F75,   tin:d.EI75,  tout:d.EO75,  pd:d.PD75,  amb:d.AM75},
+        {id:3, lp:50,  c:d.C50,  p:d.P50,  cop:d.COP50,  rla:d.RLA50,  f:d.F50,   tin:d.EI50,  tout:d.EO50,  pd:d.PD50,  amb:d.AM50},
+        {id:4, lp:25,  c:d.C25,  p:d.P25,  cop:d.COP25,  rla:d.RLA25,  f:d.F25,   tin:d.EI25,  tout:d.EO25,  pd:d.PD25,  amb:d.AM25}
+    ];
+
+    let phtml = "";
+    pts.forEach(p => {
+        let lpDisplay = p.lp;
+        if (needsStar && (p.lp ===25 || p.lp ===75)) lpDisplay +="*";
+        phtml += `<tr>
+            <td>${p.id}</td>
+            <td>${lpDisplay}</td>
+            <td>${fmt2(p.c)}</td>
+            <td>${fmt2(p.p)}</td>
+            <td>${fmt2(p.cop)}</td>
+            <td>${fmt2(p.rla)}</td>
+            <td>${fmt2(p.f)}</td>
+            <td>${fmt2(p.tin)}</td>
+            <td>${fmt2(p.tout)}</td>
+            <td>${fmt2(p.pd)}</td>
+            <td>${fmt2(p.amb)}</td>
+        </tr>`;
+    });
+    document.getElementById('perf-body').innerHTML = phtml;
+
+    const elevDisplay = (con === 'BEE') ? 'block' : 'none';
+    document.getElementById('elevated-hdr').style.display = elevDisplay;
+    document.getElementById('elevated-section').style.display = elevDisplay;
+
+    document.getElementById('elevated-perf-body').innerHTML = `
+        <tr>
+            <td>1</td>
+            <td>100</td>
+            <td>${fmt2(d.Elev_C)}</td>
+            <td>${fmt2(d.Elev_P)}</td>
+            <td>${fmt2(d.Elev_COP)}</td>
+            <td>${fmt2(d.Elev_RLA)}</td>
+            <td>${fmt2(d.Elev_F)}</td>
+            <td>12.00</td>
+            <td>7.00</td>
+            <td>${fmt2(d.Elev_PD)}</td>
+            <td>39.00</td>
+        </tr>
+    `;
+
+    document.getElementById('physical-table').innerHTML = `
+        <tr>
+            <td style="padding:0; vertical-align:top;">
+                <div style="padding:3px; background:#f2f2f2; text-align:center; font-weight:bold; border-bottom:1.5px solid #000;">OPTION 1</div>
+                <table class="inner-table">
+                    <tr><td style="width:50%">LxWxH (mm):</td><td>${d.L1}x${d.W1}x${d.H1}</td></tr>
+                    <tr><td>Shipping Weight:</td><td>${d.SW1} kg</td></tr>
+                    <tr><td>Operating Weight:</td><td>${d.OW1} kg</td></tr>
+                    <tr><td>Refrigerant Charge:</td><td>${d.RC1} kg</td></tr>
                 </table>
-
-                <div class="section-title">${ratedHeader}</div>
-                <table>
-                    <tr><th class="sub-header">Compressor</th><th class="sub-header">Evaporator</th><th class="sub-header">Air Cooled Condenser</th></tr>
-                    <tr>
-                        <td class="main-cell"><table class="inner-table">
-                            <tr><td>No. of Compressors:</td><td>${d.NumCompressors}</td></tr>
-                            <tr><td>Hertz:</td><td>50 Hz</td></tr>
-                            <tr><td>Volts:</td><td>415 V</td></tr>
-                            <tr><td>Refrigerant:</td><td>${d.Refrigerant}</td></tr>
-                        </table></td>
-                        <td class="main-cell"><table class="inner-table">
-                            <tr><td>Flow (m³/h):</td><td>${d.FlowDesign}</td></tr>
-                            <tr><td>Water Entering Temp (°C):</td><td>${d.EI100}</td></tr>
-                            <tr><td>Water Leaving Temp (°C):</td><td>${d.EO100}</td></tr>
-                            <tr><td>Pressure Drop (kPa):</td><td>${d.PD100}</td></tr>
-                            <tr><td>Fouling Factor (m².K/kW):</td><td>${d.FF}</td></tr>
-                            <tr><td>Tube Material:</td><td>${d.Mat}</td></tr>
-                        </table></td>
-                        <td class="main-cell"><table class="inner-table">
-                            <tr><td>Ambient Temp (°C):</td><td>${d.AM100}</td></tr>
-                            <tr><td>No. of Fans:</td><td>${d.NumFans}</td></tr>
-                            <tr><td>No. of Coils:</td><td>${d.NumCoils}</td></tr>
-                            <tr><td>Altitude (m):</td><td>${d.Alt}</td></tr>
-                        </table></td>
-                    </tr>
+            </td>
+            <td class="v-sep" style="padding:0; vertical-align:top;">
+                <div style="padding:3px; background:#f2f2f2; text-align:center; font-weight:bold; border-bottom:1.5px solid #000;">OPTION 2</div>
+                <table class="inner-table">
+                    <tr><td style="width:50%">LxWxH (mm):</td><td>${d.L2}x${d.W2}x${d.H2}</td></tr>
+                    <tr><td>Shipping Weight:</td><td>${d.SW2} kg</td></tr>
+                    <tr><td>Operating Weight:</td><td>${d.OW2} kg</td></tr>
+                    <tr><td>Refrigerant Charge:</td><td>${d.RC1} kg</td></tr>
                 </table>
+            </td>
+        </tr>
+    `;
 
-                <div class="section-title">${efficiencyHeader}</div>
-                <table>
-                    <tr>
-                        <td class="main-cell"><table class="inner-table">
-                            <tr><td class="bold">Capacity (kW)</td><td>${d.C100}</td></tr>
-                            <tr><td class="bold">Power (kW)</td><td>${d.P100}</td></tr>
-                            <tr><td class="bold">COP (kW/kW)</td><td>${d.COP100}</td></tr>
-                            <tr><td class="bold">${ratingLabel}</td><td>${d.ResultVal}</td></tr>
-                        </table></td>
-                        <td class="main-cell"><table class="inner-table">
-                            <tr><td>75% Load COP${ast}:</td><td>${d.COP75}</td></tr>
-                            <tr><td>50% Load COP:</td><td>${d.COP50}</td></tr>
-                            <tr><td>25% Load COP${ast}:</td><td>${d.COP25}</td></tr>
-                            ${starRatingRow}
-                        </table></td>
-                        <td class="main-cell"><table class="inner-table">${rlaHtml}</table></td>
-                    </tr>
-                </table>
-
-                <div class="section-title">${performanceHeader}</div>
-                <table class="perf-table">
-                    <tr>
-                        <th rowspan="2">Pt</th><th rowspan="2">% Load</th><th rowspan="2">Cap (kW)</th><th rowspan="2">Power (kW)</th><th rowspan="2">COP (kW/kW)</th><th rowspan="2">RLA (A)</th>
-                        <th colspan="4" class="sub-header">Evaporator</th><th class="sub-header">Air Cooled Condenser</th>
-                    </tr>
-                    <tr><th>Flow (m³/h)</th><th>T In (°C)</th><th>T Out (°C)</th><th>Pd (kPa)</th><th>Amb Temp (°C)</th></tr>
-                    <tr><td>1</td><td>100</td><td>${d.C100}</td><td>${d.P100}</td><td>${d.COP100}</td><td>${d.RLA100}</td><td>${d.F100}</td><td>12.0</td><td>7.0</td><td>${d.PD100}</td><td>35.0</td></tr>
-                    <tr><td>2</td><td>75${ast}</td><td>${d.C75}</td><td>${d.P75}</td><td>${d.COP75}</td><td>${d.RLA75}</td><td>${d.F75}</td><td>10.75</td><td>7.0</td><td>${d.PD75}</td><td>27.0</td></tr>
-                    <tr><td>3</td><td>50</td><td>${d.C50}</td><td>${d.P50}</td><td>${d.COP50}</td><td>${d.RLA50}</td><td>${d.F50}</td><td>9.50</td><td>7.0</td><td>${d.PD50}</td><td>19.0</td></tr>
-                    <tr><td>4</td><td>25${ast}</td><td>${d.C25}</td><td>${d.P25}</td><td>${d.COP25}</td><td>${d.RLA25}</td><td>${d.F25}</td><td>8.25</td><td>7.0</td><td>${d.PD25}</td><td>13.0</td></tr>
-                </table>
-
-                ${elevatedSection}
-
-                <div class="section-title">PHYSICAL DATA</div>
-                <table>
-                    <tr>
-                        <td class="main-cell">
-                            <div class="bold" style="padding: 4px; background:#f8f9fa;">OPTION 1</div>
-                            <table class="inner-table">
-                                <tr><td>Dimensions (LxWxH) (mm):</td><td>${d.L1}x${d.W1}x${d.H1}</td></tr>
-                                <tr><td>Shipping Weight (kg):</td><td>${d.SW1}</td></tr>
-                                <tr><td>Operating Weight (kg):</td><td>${d.OW1}</td></tr>
-                                <tr><td>Ref. Charge (kg):</td><td>${d.RC1}</td></tr>
-                            </table>
-                        </td>
-                        <td class="main-cell">
-                            <div class="bold" style="padding: 4px; background:#f8f9fa;">OPTION 2</div>
-                            <table class="inner-table">
-                                <tr><td>Dimensions (LxWxH) (mm):</td><td>${d.L2}x${d.W2}x${d.H2}</td></tr>
-                                <tr><td>Shipping Weight (kg):</td><td>${d.SW2}</td></tr>
-                                <tr><td>Operating Weight (kg):</td><td>${d.OW2}</td></tr>
-                                <tr><td>Oil Charge (L):</td><td>${d.OilCh}</td></tr>
-                            </table>
-                        </td>
-                    </tr>
-                </table>
-            `;
-            
-            // Set the note text
-            document.querySelector('.notes-box').innerText = noteText;
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function downloadPDF() {
-            const e = document.getElementById('report-content');
-            const opt = {
-                margin: [0.4, 0.4, 0.4, 0.4],
-                filename: 'Kirloskar_Selection_Report.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 3, useCORS: true, letterRendering: true }, 
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(e).save();
-        }
-
-        document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', validate));
-        parseData();
-    </script>
+    // ===== NOTES – exactly as you requested, no extra text =====
+    let notes = document.getElementById('notes-area');
+    if (con === 'BEE' && (mod === 'KAC011' || mod === 'KAC022')) {
+        notes.innerText = "* NOTE: Physically chiller cannot be unloaded at this condition.";
+    } else if (con === 'BEE') {
+        notes.innerText = "* Performance data is based on standard rating conditions. Actual site performance may vary.";
+    } else {
+        notes.innerText = "";
+    }
+}
+</script>
 </body>
 </html>
-
