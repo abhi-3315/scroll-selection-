@@ -416,7 +416,6 @@ function generateReport() {
         <tr><td>Ambient Temp (°C)</td><td>${fmt2(d.AM100)}</td></tr>
         <tr><td>No. of Coils</td><td>${d.NumCoils}</td></tr>
         <tr><td>No. of Fans</td><td>${d.NumFans}</td></tr>
-        <tr><td>Altitude (m)</td><td>${d.Alt}</td></tr>
     `;
 
     const effLabel = (con === 'BEE') ? "ISEER" : "IPLV";
@@ -429,13 +428,12 @@ function generateReport() {
         rlaRows += `<tr><td style="background:#ffffff; width:65%;">RLA Comp ${i} (A)</td><td>${display}</td></tr>`;
     });
 
-    const starRow = (con === 'BEE') ? `<tr><td class="label-cell">BEE Star Rating</td><td>${starLabel}</td><td class="label-cell v-sep"></td><td></td></tr>` : '';
-
+    // RLA Align Right Applied & Broken 5th Row removed to keep continuous solid border on right edge 
     document.getElementById('efficiency-table').innerHTML = `
         <tr>
             <td class="label-cell">Cooling Capacity (kW)</td><td>${fmt2(d.C100)}</td>
             <td class="label-cell v-sep">75% Load COP</td><td>${fmt2(d.COP75)}</td>
-            <td class="label-cell v-sep">Total RLA (A)</td><td>${fmt2(d.RLA100)}</td>
+            <td class="label-cell v-sep">Total RLA (A)</td><td style="text-align: right; padding-right: 12px;">${fmt2(d.RLA100)}</td>
         </tr>
         <tr>
             <td class="label-cell">Power Input (kW)</td><td>${fmt2(d.P100)}</td>
@@ -453,7 +451,6 @@ function generateReport() {
             <td class="label-cell v-sep">${con === 'BEE' ? 'BEE Star Rating' : ''}</td>
             <td>${con === 'BEE' ? starLabel : ''}</td>
         </tr>
-        ${starRow}
     `;
 
     const needsStar = (con === 'BEE' && (mod === 'KAC011' || mod === 'KAC022'));
