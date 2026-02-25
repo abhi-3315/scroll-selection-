@@ -42,8 +42,9 @@ input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius
 
 .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; }
 .comp-name { font-weight: bold; font-size: 14px; }
-.logo-img { font-size: 22px; font-weight: bold; color: #00918e; text-align: right; line-height: 1; }
-.logo-img span { color: #333; font-size: 12px; display: block; font-weight: normal; }
+
+/* Updated to handle an actual image file for the logo */
+.logo-img { height: 40px; width: auto; object-fit: contain; }
 
 .version-info { font-size: 10px; font-weight: bold; margin-bottom: 3px; }
 
@@ -80,7 +81,7 @@ th, td {
 }
 
 /* inner tables (rated performance) */
-.inner-table { width: 100%; border: none !important; }
+.inner-table { width: 100%; border: none !important; table-layout: auto; }
 .inner-table td { 
     border: none !important; 
     padding: 2px 8px 2px 5px;   
@@ -158,9 +159,9 @@ th, td {
 <div class="selection-box" id="selection-form">
     <div style="text-align:center; color:var(--navy); margin-bottom:15px;"><h2>Kirloskar Selection Tool</h2></div>
     <div class="grid">
-        <div class="input-group"><label>Client Name</label><input type="text" id="client" value="000 Practice"></div>
-        <div class="input-group"><label>Project Name</label><input type="text" id="project" value="123"></div>
-        <div class="input-group"><label>Project Incharge</label><input type="text" id="proj-incharge" value=""></div>
+        <div class="input-group"><label>Client Name</label><input type="text" id="client" value="KCPL"></div>
+        <div class="input-group"><label>Project Name</label><input type="text" id="project" value=""></div>
+        <div class="input-group"><label>Project Incharge</label><input type="text" id="proj-incharge" value="abhijit chavhan"></div>
         <div class="input-group"><label>Model</label>
             <select id="model-select">
                 <option value="KAC011">KAC011.20</option>
@@ -190,7 +191,8 @@ th, td {
                 <div class="comp-name">KIRLOSKAR CHILLERS PRIVATE LIMITED</div>
                 <div style="font-size:10px;">A Kirloskar Group Company</div>
             </div>
-            <div class="logo-img">kirloskar<span>Chillers</span></div>
+            <!-- ACTUAL LOGO IMAGE TAG ADDED HERE -->
+            <img src="chillers_logo.png" alt="Kirloskar Chillers Logo" class="logo-img">
         </div>
 
         <div class="version-info">
@@ -260,7 +262,7 @@ th, td {
             </colgroup>
             <thead>
                 <tr>
-                    <th rowspan="2">Pt</th>
+                    <th rowspan="2">load pts</th>
                     <th rowspan="2">% Load</th>
                     <th rowspan="2">Capacity<br>(kW)</th>
                     <th rowspan="2">Power<br>(kW)</th>
@@ -274,7 +276,7 @@ th, td {
                     <th>T in<br>(°C)</th>
                     <th>T out<br>(°C)</th>
                     <th>Pd<br>(kPa)</th>
-                    <th>Ambient<br>Temp (°C)</th>
+                    <th style="white-space: nowrap;">Ambient Temperature<br>(°C)</th>
                 </tr>
             </thead>
             <tbody id="perf-body"></tbody>
@@ -291,7 +293,7 @@ th, td {
             </colgroup>
             <thead>
                 <tr>
-                    <th rowspan="2">Pt</th>
+                    <th rowspan="2">load pts</th>
                     <th rowspan="2">% Load</th>
                     <th rowspan="2">Capacity<br>(kW)</th>
                     <th rowspan="2">Power<br>(kW)</th>
@@ -305,7 +307,7 @@ th, td {
                     <th>T in<br>(°C)</th>
                     <th>T out<br>(°C)</th>
                     <th>Pd<br>(kPa)</th>
-                    <th>Ambient<br>Temp (°C)</th>
+                    <th style="white-space: nowrap;">Ambient Temperature<br>(°C)</th>
                 </tr>
             </thead>
             <tbody id="elevated-perf-body"></tbody>
@@ -316,20 +318,21 @@ th, td {
         <div class="section-header">MOTOR AND PHYSICAL DATA</div>
         <table id="physical-table"></table>
 
-        <!-- NOTES – exactly as required (default note, no extra text) -->
+        <!-- NOTES -->
         <div class="section-header">NOTES</div>
         <div id="notes-area"></div>
     </div>
 </div>
 
 <script>
+// CSV updated with exact Elevated Temperature values 
 const csvData = `Model,Condition,ModelName,NumCompressors,Refrigerant,NumFans,NumCoils,FlowDesign,FF,Alt,Passes,Mat,WB,L1,W1,H1,SW1,OW1,RC1,L2,W2,H2,RC2,SW2,OW2,OilCh,CompRLA1,CompRLA2,CompRLA3,CompRLA4,ResultVal,C100,P100,COP100,RLA100,F100,EI100,EO100,PD100,AM100,C75,P75,COP75,RLA75,F75,EI75,EO75,PD75,AM75,C50,P50,COP50,RLA50,F50,EI50,EO50,PD50,AM50,C25,P25,COP25,RLA25,F25,EI25,EO25,PD25,AM25,Elev_C,Elev_P,Elev_COP,Elev_RLA,Elev_F,Elev_EI,Elev_EO,Elev_PD,Elev_AM
-KAC011,BEE,KAC011.20,2,R410A,2,2,6.15,0.018,0,1,Cu,NA,1721,1140,1469,436,561,11,2071,949,1436,11,436,561,NA,11.1,11.1,NA,NA,3.38,36.66,12.7,2.89,22.2,6.15,12.0,7.0,40,35.0,27.495,10.31,2.67,19.046,6.15,10.75,7.0,40,27.0,18.33,4.05,4.53,8.487,6.15,9.50,7.0,40,19.0,9.165,3.09,2.97,7.849,6.15,8.25,7.0,40,13.0,36.660,12.70,2.89,22.2,6.15,12,7,40,39
-KAC011,AHRI,KAC011.20,2,R410A,2,2,6.15,0.018,0,1,Cu,NA,1721,1140,1469,436,561,11,2071,949,1436,11,436,561,NA,11.1,11.1,NA,NA,3.33,36.66,12.7,2.89,22.2,6.15,12.0,7.0,40,35.0,27.495,10.31,2.67,19.046,6.15,10.75,7.0,40,27.0,18.33,4.048,4.53,8.487,6.15,9.50,7.0,40,19.0,9.165,3.087,2.97,7.849,6.15,8.25,7.0,40,13.0,36.660,12.70,2.89,22.2,6.15,12,7,40,39
-KAC022,BEE,KAC022.20,2,R410A,2,2,13.83,0.018,0,1,Cu,NA,2121,1400,1864,598,630,16,2570,1092,1869,16,598,630,NA,22.94,22.94,NA,NA,3.40,80.34,24.96,3.00,45.88,13.83,12.0,7.0,40,35.0,60.255,20.16,2.74,40.2,13.83,10.75,7.0,40,27.0,40.17,8.02,4.50,18.31,13.83,9.50,7.0,40,19.0,20.085,6.16,2.85,17.36,13.83,8.25,7.0,40,13.0,80.340,24.96,3.00,45.88,13.83,12,7,40,39
-KAC022,AHRI,KAC022.20,2,R410A,2,2,13.83,0.018,0,1,Cu,NA,2121,1400,1864,598,630,16,2570,1092,1869,16,598,630,NA,22.94,22.94,NA,NA,3.35,80.34,24.96,3.00,45.88,13.83,12.0,7.0,40,35.0,60.255,20.16,2.74,40.2,13.83,10.75,7.0,40,27.0,40.17,8.02,4.50,18.31,13.83,9.50,7.0,40,19.0,20.085,6.16,2.85,17.36,13.83,8.25,7.0,40,13.0,80.340,24.96,3.00,45.88,13.83,12,7,40,39
-KAC044,BEE,KAC044.20,4,R410A,2,4,27.67,0.018,0,1,Cu,NA,3093,1574,2189,1455,1560,44,3093,1574,2189,44,1455,1560,NA,22.94,22.94,22.94,22.94,3.91,160.68,49.92,2.96,91.76,27.67,12.0,7.0,40,35.0,120.51,30.24,3.48,60.3,27.67,10.75,7.0,40,27.0,80.34,16.04,4.41,36.62,27.67,9.50,7.0,40,19.0,40.17,6.16,4.81,17.36,27.67,8.25,7.0,40,13.0,160.680,49.92,2.96,91.76,27.67,12,7,40,39
-KAC044,AHRI,KAC044.20,4,R410A,2,4,27.67,0.018,0,1,Cu,NA,3093,1574,2189,1455,1560,44,3093,1574,2189,44,1455,1560,NA,22.94,22.94,22.94,22.94,3.98,160.68,49.92,2.96,91.76,27.67,12.0,7.0,40,35.0,120.51,30.24,3.48,60.3,27.67,10.75,7.0,40,27.0,80.34,16.04,4.41,36.62,27.67,9.50,7.0,40,19.0,40.17,6.16,4.81,17.36,27.67,8.25,7.0,40,13.0,160.680,49.92,2.96,91.76,27.67,12,7,40,39`;
+KAC011,BEE,KAC011.20,2,R410A,2,2,6.15,0.018,0,1,Cu,NA,1721,1140,1469,436,561,11,2071,949,1436,11,436,561,NA,11.1,11.1,NA,NA,3.38,36.66,12.7,2.887,22.2,6.15,12.0,7.0,40,35.0,27.495,10.31,2.667,19.046,6.15,10.75,7.0,40,27.0,18.33,4.05,4.528,8.487,6.15,9.50,7.0,40,19.0,9.165,3.09,2.969,7.849,6.15,8.25,7.0,40,13.0,33.360,13.60,2.454,23.6,6.15,12,7,1,39
+KAC011,AHRI,KAC011.20,2,R410A,2,2,6.15,0.018,0,1,Cu,NA,1721,1140,1469,436,561,11,2071,949,1436,11,436,561,NA,11.1,11.1,NA,NA,3.33,36.66,12.7,2.887,22.2,6.15,12.0,7.0,40,35.0,27.495,10.31,2.667,19.046,6.15,10.75,7.0,40,27.0,18.33,4.048,4.528,8.487,6.15,9.50,7.0,40,19.0,9.165,3.087,2.969,7.849,6.15,8.25,7.0,40,13.0,33.360,13.60,2.45,23.6,6.15,12,7,1,39
+KAC022,BEE,KAC022.20,2,R410A,2,2,13.83,0.018,0,1,Cu,NA,2121,1400,1864,598,630,16,2570,1092,1869,16,598,630,NA,22.94,22.94,NA,NA,3.40,80.34,24.96,3.002,45.88,13.83,12.0,7.0,40,35.0,60.255,20.16,2.744,40.2,13.83,10.75,7.0,40,27.0,40.17,8.02,4.504,18.31,13.83,9.50,7.0,40,19.0,20.085,6.16,2.847,17.36,13.83,8.25,7.0,40,13.0,73.240,28.78,2.545,48.46,13.83,12,7,4,39
+KAC022,AHRI,KAC022.20,2,R410A,2,2,13.83,0.018,0,1,Cu,NA,2121,1400,1864,598,630,16,2570,1092,1869,16,598,630,NA,22.94,22.94,NA,NA,3.35,80.34,24.96,3.002,45.88,13.83,12.0,7.0,40,35.0,60.255,20.16,2.744,40.2,13.83,10.75,7.0,40,27.0,40.17,8.02,4.504,18.31,13.83,9.50,7.0,40,19.0,20.085,6.16,2.847,17.36,13.83,8.25,7.0,40,13.0,73.240,28.78,2.545,48.46,13.83,12,7,4,39
+KAC044,BEE,KAC044.20,4,R410A,2,4,27.67,0.018,0,1,Cu,NA,3093,1574,2189,1455,1560,44,3093,1574,2189,44,1455,1560,NA,22.94,22.94,22.94,22.94,3.91,160.68,49.92,2.958,91.76,27.67,12.0,7.0,40,35.0,120.51,30.24,3.479,60.3,27.67,10.75,7.0,40,27.0,80.34,16.04,4.405,36.62,27.67,9.50,7.0,40,19.0,40.17,6.16,4.807,17.36,27.67,8.25,7.0,40,13.0,146.480,58.36,0.971,96.92,27.67,12,7,13,39
+KAC044,AHRI,KAC044.20,4,R410A,2,4,27.67,0.018,0,1,Cu,NA,3093,1574,2189,1455,1560,44,3093,1574,2189,44,1455,1560,NA,22.94,22.94,22.94,22.94,3.98,160.68,49.92,2.958,91.76,27.67,12.0,7.0,40,35.0,120.51,30.24,3.479,60.3,27.67,10.75,7.0,40,27.0,80.34,16.04,4.405,36.62,27.67,9.50,7.0,40,19.0,40.17,6.16,4.807,17.36,27.67,8.25,7.0,40,13.0,146.480,150.88,0.971,96.92,27.67,12,7,13,39`;
 
 const BEE_STAR_LABELS = {
     'KAC011': '2 Star',
@@ -337,10 +340,18 @@ const BEE_STAR_LABELS = {
     'KAC044': '3 Star'
 };
 
+/* Format function for 2 decimal places (default) */
 function fmt2(val) {
     let n = parseFloat(val);
     if (isNaN(n)) return val;
     return n.toFixed(2);
+}
+
+/* Format function to explicitly force 3 decimal places for standard COP */
+function fmt3(val) {
+    let n = parseFloat(val);
+    if (isNaN(n)) return val;
+    return n.toFixed(3);
 }
 
 let db = [];
@@ -404,18 +415,18 @@ function generateReport() {
 
     document.getElementById('evap-data').innerHTML = `
         <tr><td>Flow (m³/h)</td><td>${fmt2(d.FlowDesign)}</td></tr>
-        <tr><td>Entering Temp (°C)</td><td>12.00</td></tr>
-        <tr><td>Leaving Temp (°C)</td><td>7.00</td></tr>
+        <tr><td style="white-space: nowrap;">Entering Water Temperature (°C)</td><td>12.00</td></tr>
+        <tr><td style="white-space: nowrap;">Leaving Water Temperature (°C)</td><td>7.00</td></tr>
         <tr><td>No. of Passes</td><td>${d.Passes}</td></tr>
-        <tr><td>FoulingFactor(m².K/kW)</td><td>${d.FF}</td></tr>
+        <tr><td>Fouling Factor (m².K/kW)</td><td>${d.FF}</td></tr>
         <tr><td>Pressure Drop (kPa)</td><td>${fmt2(d.PD100)}</td></tr>
         <tr><td>Tube Material</td><td>Cu</td></tr>
     `;
 
     document.getElementById('cond-data').innerHTML = `
-        <tr><td>Ambient Temp (°C)</td><td>${fmt2(d.AM100)}</td></tr>
-        <tr><td>No. of Coils</td><td>${d.NumCoils}</td></tr>
-        <tr><td>No. of Fans</td><td>${d.NumFans}</td></tr>
+        <tr><td style="white-space: nowrap;">Ambient Temperature (°C)</td><td>${fmt2(d.AM100)}</td></tr>
+        <tr><td>No. of condenser Coils</td><td>${d.NumCoils}</td></tr>
+        <tr><td>No. of condenser Fans</td><td>${d.NumFans}</td></tr>
     `;
 
     const effLabel = (con === 'BEE') ? "ISEER" : "IPLV";
@@ -425,26 +436,25 @@ function generateReport() {
     [1,2,3,4].forEach(i => {
         let val = d['CompRLA' + i];
         let display = (val && val.trim() !== 'NA' && val.trim() !== '') ? fmt2(val) : 'NA';
-        rlaRows += `<tr><td style="background:#ffffff; width:65%;">RLA Comp ${i} (A)</td><td>${display}</td></tr>`;
+        rlaRows += `<tr><td style="background:#ffffff; width:65%;">RLA Compressor ${i} (A)</td><td>${display}</td></tr>`;
     });
 
-    // RLA Align Right Applied & Broken 5th Row removed to keep continuous solid border on right edge 
     document.getElementById('efficiency-table').innerHTML = `
         <tr>
-            <td class="label-cell">Cooling Capacity (kW)</td><td>${fmt2(d.C100)}</td>
-            <td class="label-cell v-sep">75% Load COP</td><td>${fmt2(d.COP75)}</td>
+            <td class="label-cell"> Capacity (kW)</td><td>${fmt2(d.C100)}</td>
+            <td class="label-cell v-sep">75% Load COP</td><td>${fmt3(d.COP75)}</td>
             <td class="label-cell v-sep">Total RLA (A)</td><td style="text-align: right; padding-right: 12px;">${fmt2(d.RLA100)}</td>
         </tr>
         <tr>
-            <td class="label-cell">Power Input (kW)</td><td>${fmt2(d.P100)}</td>
-            <td class="label-cell v-sep">50% Load COP</td><td>${fmt2(d.COP50)}</td>
+            <td class="label-cell">Power(kW)</td><td>${fmt2(d.P100)}</td>
+            <td class="label-cell v-sep">50% Load COP</td><td>${fmt3(d.COP50)}</td>
             <td rowspan="3" colspan="2" class="v-sep" style="padding:0; vertical-align:top;">
                 <table class="inner-table">${rlaRows}</table>
             </td>
         </tr>
         <tr>
-            <td class="label-cell">COP (kW/kW)</td><td>${fmt2(d.COP100)}</td>
-            <td class="label-cell v-sep">25% Load COP</td><td>${fmt2(d.COP25)}</td>
+            <td class="label-cell">COP (kW/kW)</td><td>${fmt3(d.COP100)}</td>
+            <td class="label-cell v-sep">25% Load COP</td><td>${fmt3(d.COP25)}</td>
         </tr>
         <tr>
             <td class="label-cell">${effLabel}</td><td>${fmt2(d.ResultVal)}</td>
@@ -471,7 +481,7 @@ function generateReport() {
             <td>${lpDisplay}</td>
             <td>${fmt2(p.c)}</td>
             <td>${fmt2(p.p)}</td>
-            <td>${fmt2(p.cop)}</td>
+            <td>${fmt3(p.cop)}</td>
             <td>${fmt2(p.rla)}</td>
             <td>${fmt2(p.f)}</td>
             <td>${fmt2(p.tin)}</td>
@@ -486,19 +496,20 @@ function generateReport() {
     document.getElementById('elevated-hdr').style.display = elevDisplay;
     document.getElementById('elevated-section').style.display = elevDisplay;
 
+    // Formatting for Elevated output
     document.getElementById('elevated-perf-body').innerHTML = `
         <tr>
             <td>1</td>
             <td>100</td>
-            <td>${fmt2(d.Elev_C)}</td>
-            <td>${fmt2(d.Elev_P)}</td>
-            <td>${fmt2(d.Elev_COP)}</td>
-            <td>${fmt2(d.Elev_RLA)}</td>
-            <td>${fmt2(d.Elev_F)}</td>
-            <td>12.00</td>
-            <td>7.00</td>
-            <td>${fmt2(d.Elev_PD)}</td>
-            <td>39.00</td>
+            <td>${parseFloat(d.Elev_C).toFixed(3)}</td>
+            <td>${parseFloat(d.Elev_P).toFixed(2)}</td>
+            <td>${d.Elev_COP}</td>
+            <td>${d.Elev_RLA}</td>
+            <td>${parseFloat(d.Elev_F).toFixed(2)}</td>
+            <td>${d.Elev_EI}</td>
+            <td>${d.Elev_EO}</td>
+            <td>${d.Elev_PD}</td>
+            <td>${d.Elev_AM}</td>
         </tr>
     `;
 
@@ -525,7 +536,6 @@ function generateReport() {
         </tr>
     `;
 
-    // ===== NOTES – exactly as you requested, no extra text =====
     let notes = document.getElementById('notes-area');
     if (con === 'BEE' && (mod === 'KAC011' || mod === 'KAC022')) {
         notes.innerText = "* NOTE: Physically chiller cannot be unloaded at this condition.";
