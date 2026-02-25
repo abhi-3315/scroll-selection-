@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -354,6 +354,20 @@ function fmt3(val) {
     return n.toFixed(3);
 }
 
+/* DYNAMIC FORMAT: Applied for RLA & 39 Ambient metrics. 
+   - 2 decimal places if there are 2 digits before the decimal (>= 10)
+   - 3 decimal places if there is 1 digit before the decimal (< 10) */
+function fmtDynamic(val) {
+    let n = parseFloat(val);
+    if (isNaN(n)) return val;
+    let intPart = Math.floor(Math.abs(n));
+    if (intPart >= 10) {
+        return n.toFixed(2);
+    } else {
+        return n.toFixed(3);
+    }
+}
+
 let db =[];
 function parseCSV() {
     const lines = csvData.trim().split('\n');
@@ -441,9 +455,10 @@ function generateReport() {
 
     const effLabel = (con === 'BEE') ? "ISEER" : "IPLV";
 
+    // Applying fmtDynamic for Comp RLA formatting rules based on digits
     let rlaRows = '';[1,2,3,4].forEach(i => {
         let val = d['CompRLA' + i];
-        let display = (val && val.trim() !== 'NA' && val.trim() !== '') ? fmt2(val) : 'NA';
+        let display = (val && val.trim() !== 'NA' && val.trim() !== '') ? fmtDynamic(val) : 'NA';
         rlaRows += `<tr><td style="background:#ffffff; width:65%;">RLA Compressor ${i} (A)</td><td>${display}</td></tr>`;
     });
 
@@ -451,7 +466,7 @@ function generateReport() {
         <tr>
             <td class="label-cell"> Capacity (kW)</td><td>${fmt2(d.C100)}</td>
             <td class="label-cell v-sep">75% Load COP</td><td>${fmt3(d.COP75)}</td>
-            <td class="label-cell v-sep">Total RLA (A)</td><td style="text-align: right; padding-right: 12px;">${fmt2(d.RLA100)}</td>
+            <td class="label-cell v-sep">Total RLA (A)</td><td style="text-align: right; padding-right: 12px;">${fmtDynamic(d.RLA100)}</td>
         </tr>
         <tr>
             <td class="label-cell">Power(kW)</td><td>${fmt2(d.P100)}</td>
@@ -484,13 +499,14 @@ function generateReport() {
     pts.forEach(p => {
         let lpDisplay = p.lp;
         if (needsStar && (p.lp ===25 || p.lp ===75)) lpDisplay +="*";
+        // RLA here will automatically pick up dynamic 2-dec vs 3-dec format rounding up
         phtml += `<tr>
             <td>${p.id}</td>
             <td>${lpDisplay}</td>
             <td>${fmt2(p.c)}</td>
             <td>${fmt2(p.p)}</td>
             <td>${fmt3(p.cop)}</td>
-            <td>${fmt3(p.rla)}</td>
+            <td>${fmtDynamic(p.rla)}</td>
             <td>${fmt2(p.f)}</td>
             <td>${fmt2(p.tin)}</td>
             <td>${fmt2(p.tout)}</td>
@@ -504,15 +520,15 @@ function generateReport() {
     document.getElementById('elevated-hdr').style.display = elevDisplay;
     document.getElementById('elevated-section').style.display = elevDisplay;
 
-    // Formatting for Elevated output using fmt3 for COP and Capacity based on exact values
+    // Formatting for 39 AMBIENT (Elevated Output) strictly addressing RLA, Cap, Power & COP formatting
     document.getElementById('elevated-perf-body').innerHTML = `
         <tr>
             <td>1</td>
             <td>100</td>
-            <td>${fmt3(d.Elev_C)}</td>
-            <td>${fmt2(d.Elev_P)}</td>
-            <td>${fmt3(d.Elev_COP)}</td>
-            <td>${d.Elev_RLA}</td>
+            <td>${fmtDynamic(d.Elev_C)}</td>
+            <td>${fmtDynamic(d.Elev_P)}</td>
+            <td>${fmtDynamic(d.Elev_COP)}</td>
+            <td>${fmtDynamic(d.Elev_RLA)}</td>
             <td>${fmt2(d.Elev_F)}</td>
             <td>${fmt2(d.Elev_EI)}</td>
             <td>${fmt2(d.Elev_EO)}</td>
@@ -556,10 +572,3 @@ function generateReport() {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
