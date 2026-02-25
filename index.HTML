@@ -159,7 +159,7 @@ th, td {
 <div class="selection-box" id="selection-form">
     <div style="text-align:center; color:var(--navy); margin-bottom:15px;"><h2>Kirloskar Selection Tool</h2></div>
     <div class="grid">
-        <div class="input-group"><label>Client Name</label><input type="text" id="client" value=""></div>
+        <div class="input-group"><label>Client Name</label><input type="text" id="client" value="KCPL"></div>
         <div class="input-group"><label>Project Name</label><input type="text" id="project" value=""></div>
         <div class="input-group"><label>Project Incharge</label><input type="text" id="proj-incharge" value=""></div>
         <div class="input-group"><label>Model</label>
@@ -224,7 +224,7 @@ th, td {
                 <td class="label-cell v-sep">Compressor Type</td><td class="v-sep">Fixed Speed</td>
             </tr>
             <tr id="bmg-row">
-                <td class="label-cell">BMG</td><td class="v-sep" id="d-bmg">BMGA8</td>
+                <td class="label-cell">BMG</td><td class="v-sep" id="d-bmg"></td>
                 <td class="label-cell v-sep">Starter Type</td><td class="v-sep">Star Delta</td>
             </tr>
             <tr id="starter-row-ahri" style="display:none;">
@@ -325,14 +325,14 @@ th, td {
 </div>
 
 <script>
-// UPDATED WITH BRAND NEW CORRECTED VALUES FOR BOTH BEE & AHRI CONDITIONS
+// CSV data UPDATED with ALL Pressure Drop values set strictly to 40 (for all 4 load points + elevated point)
 const csvData = `Model,Condition,ModelName,NumCompressors,Refrigerant,NumFans,NumCoils,FlowDesign,FF,Alt,Passes,Mat,WB,L1,W1,H1,SW1,OW1,RC1,L2,W2,H2,RC2,SW2,OW2,OilCh,CompRLA1,CompRLA2,CompRLA3,CompRLA4,ResultVal,C100,P100,COP100,RLA100,F100,EI100,EO100,PD100,AM100,C75,P75,COP75,RLA75,F75,EI75,EO75,PD75,AM75,C50,P50,COP50,RLA50,F50,EI50,EO50,PD50,AM50,C25,P25,COP25,RLA25,F25,EI25,EO25,PD25,AM25,Elev_C,Elev_P,Elev_COP,Elev_RLA,Elev_F,Elev_EI,Elev_EO,Elev_PD,Elev_AM
-KAC011,BEE,KAC011.20,2,R410A,2,2,6.15,0.018,0,1,Cu,NA,1721,1140,1469,436,561,11,2071,949,1436,11,436,561,NA,11.1,11.1,NA,NA,3.38,35.72,12.70,2.813,22.2,6.15,12.00,7.00,1.00,35.00,26.790,10.31,2.598,19.046,6.15,10.75,7.00,1.00,27.00,17.860,4.05,4.412,8.487,6.15,9.50,7.00,1.00,19.00,8.930,3.09,2.893,7.849,6.15,8.25,7.00,1.00,13.00,33.360,13.60,2.450,23.6,6.15,12,7,1,39
-KAC011,AHRI,KAC011.20,2,R410A,2,2,6.15,0.018,0,1,Cu,NA,1721,1140,1469,436,561,11,2071,949,1436,11,436,561,NA,11.1,11.1,NA,NA,3.33,36.660,12.70,2.887,22.2,6.15,12.00,7.00,1.00,35.00,27.495,10.31,2.667,19.046,6.15,10.75,7.00,1.00,27.00,18.330,4.05,4.528,8.487,6.15,9.50,7.00,1.00,19.00,9.165,3.09,2.969,7.849,6.15,8.25,7.00,1.00,13.00,33.360,13.60,2.450,23.6,6.15,12,7,1,39
-KAC022,BEE,KAC022.20,2,R410A,2,2,13.83,0.018,0,1,Cu,NA,2121,1400,1864,598,630,16,2570,1092,1869,16,598,630,NA,22.94,22.94,NA,NA,3.40,80.34,26.76,3.002,45.88,13.83,12.00,7.00,4.00,35.00,60.26,21.96,2.744,40.2,13.83,10.75,7.00,4.00,27.00,40.17,8.92,4.504,18.31,13.83,9.50,7.00,4.00,19.00,20.09,7.06,2.847,17.36,13.83,8.25,7.00,4.00,13.00,73.240,28.78,2.545,48.46,13.83,12,7,4,39
-KAC022,AHRI,KAC022.20,2,R410A,2,2,13.83,0.018,0,1,Cu,NA,2121,1400,1864,598,630,16,2570,1092,1869,16,598,630,NA,22.94,22.94,NA,NA,3.35,80.340,24.96,3.002,45.88,13.83,12.00,7.00,4.00,35.00,60.255,20.16,2.744,40.2,13.83,10.75,7.00,4.00,27.00,40.170,8.02,4.504,18.31,13.83,9.50,7.00,4.00,19.00,20.085,6.16,2.847,17.36,13.83,8.25,7.00,4.00,13.00,73.240,28.78,2.545,48.46,13.83,12,7,4,39
-KAC044,BEE,KAC044.20,4,R410A,2,4,27.67,0.018,0,1,Cu,NA,3093,1574,2189,1455,1560,44,3093,1574,2189,44,1455,1560,NA,22.94,22.94,22.94,22.94,3.91,160.680,54.32,2.958,91.76,27.67,12.00,7.00,13.00,35.00,120.510,34.64,3.479,60.30,27.67,10.75,7.00,13.00,27.00,80.340,18.24,4.405,36.62,27.67,9.50,7.00,13.00,19.00,40.170,8.36,4.807,17.36,27.67,8.25,7.00,13.00,13.00,146.480,58.36,2.510,96.92,27.67,12,7,13,39
-KAC044,AHRI,KAC044.20,4,R410A,2,4,27.67,0.018,0,1,Cu,NA,3093,1574,2189,1455,1560,44,3093,1574,2189,44,1455,1560,NA,22.94,22.94,22.94,22.94,3.98,160.680,49.92,2.958,91.76,27.67,12.00,7.00,13.00,35.00,120.510,30.24,3.479,60.30,27.67,10.75,7.00,13.00,27.00,80.340,16.04,4.405,36.62,27.67,9.50,7.00,13.00,19.00,40.170,6.16,4.807,17.36,27.67,8.25,7.00,13.00,13.00,146.480,58.36,2.510,96.92,27.67,12,7,13,39`;
+KAC011,BEE,KAC011.20,2,R410A,2,2,6.15,0.018,0,1,Cu,NA,1721,1140,1469,436,561,11,2071,949,1436,11,436,561,NA,11.1,11.1,NA,NA,3.38,35.72,12.70,2.813,22.2,6.15,12.00,7.00,40,35.00,26.790,10.31,2.598,19.046,6.15,10.75,7.00,40,27.00,17.860,4.05,4.412,8.487,6.15,9.50,7.00,40,19.00,8.930,3.09,2.893,7.849,6.15,8.25,7.00,40,13.00,33.360,13.60,2.450,23.6,6.15,12,7,40,39
+KAC011,AHRI,KAC011.20,2,R410A,2,2,6.15,0.018,0,1,Cu,NA,1721,1140,1469,436,561,11,2071,949,1436,11,436,561,NA,11.1,11.1,NA,NA,3.33,36.660,12.70,2.887,22.2,6.15,12.00,7.00,40,35.00,27.495,10.31,2.667,19.046,6.15,10.75,7.00,40,27.00,18.330,4.05,4.528,8.487,6.15,9.50,7.00,40,19.00,9.165,3.09,2.969,7.849,6.15,8.25,7.00,40,13.00,33.360,13.60,2.450,23.6,6.15,12,7,40,39
+KAC022,BEE,KAC022.20,2,R410A,2,2,13.83,0.018,0,1,Cu,NA,2121,1400,1864,598,630,16,2570,1092,1869,16,598,630,NA,22.94,22.94,NA,NA,3.40,80.34,26.76,3.002,45.88,13.83,12.00,7.00,40,35.00,60.26,21.96,2.744,40.2,13.83,10.75,7.00,40,27.00,40.17,8.92,4.504,18.31,13.83,9.50,7.00,40,19.00,20.09,7.06,2.847,17.36,13.83,8.25,7.00,40,13.00,73.240,28.78,2.545,48.46,13.83,12,7,40,39
+KAC022,AHRI,KAC022.20,2,R410A,2,2,13.83,0.018,0,1,Cu,NA,2121,1400,1864,598,630,16,2570,1092,1869,16,598,630,NA,22.94,22.94,NA,NA,3.35,80.340,24.96,3.002,45.88,13.83,12.00,7.00,40,35.00,60.255,20.16,2.744,40.2,13.83,10.75,7.00,40,27.00,40.170,8.02,4.504,18.31,13.83,9.50,7.00,40,19.00,20.085,6.16,2.847,17.36,13.83,8.25,7.00,40,13.00,73.240,28.78,2.545,48.46,13.83,12,7,40,39
+KAC044,BEE,KAC044.20,4,R410A,2,4,27.67,0.018,0,1,Cu,NA,3093,1574,2189,1455,1560,44,3093,1574,2189,44,1455,1560,NA,22.94,22.94,22.94,22.94,3.91,160.680,54.32,2.958,91.76,27.67,12.00,7.00,40,35.00,120.510,34.64,3.479,60.30,27.67,10.75,7.00,40,27.00,80.340,18.24,4.405,36.62,27.67,9.50,7.00,40,19.00,40.170,8.36,4.807,17.36,27.67,8.25,7.00,40,13.00,146.480,56.36,2.510,96.92,27.67,12,7,40,39
+KAC044,AHRI,KAC044.20,4,R410A,2,4,27.67,0.018,0,1,Cu,NA,3093,1574,2189,1455,1560,44,3093,1574,2189,44,1455,1560,NA,22.94,22.94,22.94,22.94,3.98,160.680,49.92,2.958,91.76,27.67,12.00,7.00,40,35.00,120.510,30.24,3.479,60.30,27.67,10.75,7.00,40,27.00,80.340,16.04,4.405,36.62,27.67,9.50,7.00,40,19.00,40.170,6.16,4.807,17.36,27.67,8.25,7.00,40,13.00,146.480,56.36,2.510,96.92,27.67,12,7,40,39`;
 
 const BEE_STAR_LABELS = {
     'KAC011': '2 Star',
@@ -354,7 +354,7 @@ function fmt3(val) {
     return n.toFixed(3);
 }
 
-let db = [];
+let db =[];
 function parseCSV() {
     const lines = csvData.trim().split('\n');
     const headers = lines[0].split(',');
@@ -387,8 +387,18 @@ function generateReport() {
     document.getElementById('d-incharge').innerText = document.getElementById('proj-incharge').value || '—';
     document.getElementById('d-model-name').innerText = d.ModelName;
 
+    const starLabel = (con === 'BEE') ? (BEE_STAR_LABELS[mod] || '3 Star') : '';
+
     if (con === 'BEE') {
-        document.getElementById('d-bmg').innerText = 'BMGA8';
+        // DYNAMIC LOGIC FOR BMG BASED ON STAR RATING
+        let bmgVal = 'BMGA3'; // default fallback
+        if (starLabel.includes('2')) {
+            bmgVal = 'BMGA2';
+        } else if (starLabel.includes('3')) {
+            bmgVal = 'BMGA3';
+        }
+        
+        document.getElementById('d-bmg').innerText = bmgVal;
         document.getElementById('bmg-row').style.display = '';
         document.getElementById('starter-row-ahri').style.display = 'none';
     } else {
@@ -430,10 +440,8 @@ function generateReport() {
     `;
 
     const effLabel = (con === 'BEE') ? "ISEER" : "IPLV";
-    const starLabel = (con === 'BEE') ? (BEE_STAR_LABELS[mod] || '3 Star') : '';
 
-    let rlaRows = '';
-    [1,2,3,4].forEach(i => {
+    let rlaRows = '';[1,2,3,4].forEach(i => {
         let val = d['CompRLA' + i];
         let display = (val && val.trim() !== 'NA' && val.trim() !== '') ? fmt2(val) : 'NA';
         rlaRows += `<tr><td style="background:#ffffff; width:65%;">RLA Compressor ${i} (A)</td><td>${display}</td></tr>`;
@@ -465,7 +473,7 @@ function generateReport() {
 
     const needsStar = (con === 'BEE' && (mod === 'KAC011' || mod === 'KAC022'));
 
-    const pts = [
+    const pts =[
         {id:1, lp:100, c:d.C100, p:d.P100, cop:d.COP100, rla:d.RLA100, f:d.F100,  tin:d.EI100, tout:d.EO100, pd:d.PD100, amb:d.AM100},
         {id:2, lp:75,  c:d.C75,  p:d.P75,  cop:d.COP75,  rla:d.RLA75,  f:d.F75,   tin:d.EI75,  tout:d.EO75,  pd:d.PD75,  amb:d.AM75},
         {id:3, lp:50,  c:d.C50,  p:d.P50,  cop:d.COP50,  rla:d.RLA50,  f:d.F50,   tin:d.EI50,  tout:d.EO50,  pd:d.PD50,  amb:d.AM50},
@@ -548,4 +556,3 @@ function generateReport() {
 </script>
 </body>
 </html>
-
