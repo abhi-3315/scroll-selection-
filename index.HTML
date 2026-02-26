@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -132,7 +132,7 @@ th, td {
 .perf-table col.col-pd    { width: 6%; }
 .perf-table col.col-amb   { width: 13%; }
 
-/* NOTES – exactly as requested (default note visible) */
+/* NOTES */
 #notes-area {
     border: 2px solid var(--border); 
     padding: 14px 12px;               
@@ -368,6 +368,20 @@ function fmtDynamic(val) {
     }
 }
 
+/* DYNAMIC FORMAT FOR FLOW: 
+   - 2 decimal places if there are 2 digits before the decimal (>= 10)
+   - 3 decimal places if there is 1 digit before the decimal (< 10) */
+function fmtFlow(val) {
+    let n = parseFloat(val);
+    if (isNaN(n)) return val;
+    let intPart = Math.floor(Math.abs(n));
+    if (intPart >= 10) {
+        return n.toFixed(2);
+    } else {
+        return n.toFixed(3);
+    }
+}
+
 let db =[];
 function parseCSV() {
     const lines = csvData.trim().split('\n');
@@ -438,7 +452,7 @@ function generateReport() {
     `;
 
     document.getElementById('evap-data').innerHTML = `
-        <tr><td>Flow (m³/h)</td><td>${fmt2(d.FlowDesign)}</td></tr>
+        <tr><td>Flow (m³/h)</td><td>${fmtFlow(d.FlowDesign)}</td></tr>
         <tr><td style="white-space: nowrap;">Entering Water Temperature (°C)</td><td>12.0</td></tr>
         <tr><td style="white-space: nowrap;">Leaving Water Temperature (°C)</td><td>7.0</td></tr>
         <tr><td>No. of Passes</td><td>${d.Passes}</td></tr>
@@ -507,7 +521,7 @@ function generateReport() {
             <td>${fmt2(p.p)}</td>
             <td>${fmt3(p.cop)}</td>
             <td>${fmtDynamic(p.rla)}</td>
-            <td>${fmt2(p.f)}</td>
+            <td>${fmtFlow(p.f)}</td>
             <td>${fmt2(p.tin)}</td>
             <td>${fmt2(p.tout)}</td>
             <td>${fmt2(p.pd)}</td>
@@ -529,7 +543,7 @@ function generateReport() {
             <td>${fmtDynamic(d.Elev_P)}</td>
             <td>${fmtDynamic(d.Elev_COP)}</td>
             <td>${fmtDynamic(d.Elev_RLA)}</td>
-            <td>${fmt2(d.Elev_F)}</td>
+            <td>${fmtFlow(d.Elev_F)}</td>
             <td>${fmt2(d.Elev_EI)}</td>
             <td>${fmt2(d.Elev_EO)}</td>
             <td>${fmt2(d.Elev_PD)}</td>
@@ -572,6 +586,3 @@ function generateReport() {
 </script>
 </body>
 </html>
-
-
-
