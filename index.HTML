@@ -340,6 +340,13 @@ const BEE_STAR_LABELS = {
     'KAC044': '3 Star'
 };
 
+/* NEW: Format function for 1 decimal place (for PD and Ambient) */
+function fmt1(val) {
+    let n = parseFloat(val);
+    if (isNaN(n)) return val;
+    return n.toFixed(1);
+}
+
 /* Format function for 2 decimal places (default) */
 function fmt2(val) {
     let n = parseFloat(val);
@@ -439,16 +446,16 @@ function generateReport() {
 
     document.getElementById('evap-data').innerHTML = `
         <tr><td>Flow (m³/h)</td><td>${fmt2(d.FlowDesign)}</td></tr>
-        <tr><td style="white-space: nowrap;">Entering Water Temperature (°C)</td><td>12.00</td></tr>
-        <tr><td style="white-space: nowrap;">Leaving Water Temperature (°C)</td><td>7.00</td></tr>
+        <tr><td style="white-space: nowrap;">Entering Water Temperature (°C)</td><td>12.0</td></tr>
+        <tr><td style="white-space: nowrap;">Leaving Water Temperature (°C)</td><td>7.0</td></tr>
         <tr><td>No. of Passes</td><td>${d.Passes}</td></tr>
         <tr><td>Fouling Factor (m².K/kW)</td><td>${d.FF}</td></tr>
-        <tr><td>Pressure Drop (kPa)</td><td>${fmt2(d.PD100)}</td></tr>
+        <tr><td>Pressure Drop (kPa)</td><td>${fmt1(d.PD100)}</td></tr> <!-- UPDATED TO FMT1 -->
         <tr><td>Tube Material</td><td>Cu</td></tr>
     `;
 
     document.getElementById('cond-data').innerHTML = `
-        <tr><td style="white-space: nowrap;">Ambient Temperature (°C)</td><td>${fmt2(d.AM100)}</td></tr>
+        <tr><td style="white-space: nowrap;">Ambient Temperature (°C)</td><td>${fmt1(d.AM100)}</td></tr> <!-- UPDATED TO FMT1 -->
         <tr><td>No. of condenser Coils</td><td>${d.NumCoils}</td></tr>
         <tr><td>No. of condenser Fans</td><td>${d.NumFans}</td></tr>
     `;
@@ -499,7 +506,7 @@ function generateReport() {
     pts.forEach(p => {
         let lpDisplay = p.lp;
         if (needsStar && (p.lp ===25 || p.lp ===75)) lpDisplay +="*";
-        // RLA here will automatically pick up dynamic 2-dec vs 3-dec format rounding up
+        // PD and AMB strictly formatted to 1 decimal place using fmt1()
         phtml += `<tr>
             <td>${p.id}</td>
             <td>${lpDisplay}</td>
@@ -510,8 +517,8 @@ function generateReport() {
             <td>${fmt2(p.f)}</td>
             <td>${fmt2(p.tin)}</td>
             <td>${fmt2(p.tout)}</td>
-            <td>${fmt2(p.pd)}</td>
-            <td>${fmt2(p.amb)}</td>
+            <td>${fmt1(p.pd)}</td> <!-- UPDATED TO FMT1 -->
+            <td>${fmt1(p.amb)}</td> <!-- UPDATED TO FMT1 -->
         </tr>`;
     });
     document.getElementById('perf-body').innerHTML = phtml;
@@ -520,7 +527,7 @@ function generateReport() {
     document.getElementById('elevated-hdr').style.display = elevDisplay;
     document.getElementById('elevated-section').style.display = elevDisplay;
 
-    // Formatting for 39 AMBIENT (Elevated Output) strictly addressing RLA, Cap, Power & COP formatting
+    // PD and AMB formatted to 1 decimal place using fmt1()
     document.getElementById('elevated-perf-body').innerHTML = `
         <tr>
             <td>1</td>
@@ -532,8 +539,8 @@ function generateReport() {
             <td>${fmt2(d.Elev_F)}</td>
             <td>${fmt2(d.Elev_EI)}</td>
             <td>${fmt2(d.Elev_EO)}</td>
-            <td>${fmt2(d.Elev_PD)}</td>
-            <td>${fmt2(d.Elev_AM)}</td>
+            <td>${fmt1(d.Elev_PD)}</td> <!-- UPDATED TO FMT1 -->
+            <td>${fmt1(d.Elev_AM)}</td> <!-- UPDATED TO FMT1 -->
         </tr>
     `;
 
@@ -570,8 +577,3 @@ function generateReport() {
     }
 }
 </script>
-</body>
-</html>
-
-
-
