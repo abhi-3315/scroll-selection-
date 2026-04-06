@@ -5,59 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kirloskar Selection Tool</title>
 
+<!-- PDF Generator -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
+<!-- FIREBASE CLOUD DATABASE (V8 for easy single-file use) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
 <style>
-:root {
-    --navy: #1a2a5e;
-    --border: #000000;
-}
+:root { --navy: #1a2a5e; --border: #000000; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; padding: 8px; color: #000; }
 
-body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background: #fff;
-    padding: 8px;
-    color: #000;
-}
-
-/* --- LOGIN SCREEN STYLES --- */
+/* --- LOGIN & ADMIN STYLES --- */
 #login-screen, #admin-dashboard {
-    max-width: 450px;
-    margin: 80px auto;
-    background: #f9f9f9;
-    padding: 30px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    max-width: 450px; margin: 80px auto; background: #f9f9f9; padding: 30px;
+    border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
-#admin-dashboard {
-    max-width: 700px;
-    display: none;
-}
-.login-header {
-    text-align: center;
-    color: var(--navy);
-    margin-bottom: 25px;
-}
-.login-header img {
-    height: 50px;
-    margin-bottom: 10px;
-}
-#login-message {
-    font-size: 13px;
-    font-weight: bold;
-    margin-top: 15px;
-    display: none;
-    text-align: center;
-    padding: 10px;
-    border-radius: 5px;
-}
+#admin-dashboard { max-width: 700px; display: none; }
+.login-header { text-align: center; color: var(--navy); margin-bottom: 25px; }
+.login-header img { height: 50px; margin-bottom: 10px; }
+#login-message { font-size: 13px; font-weight: bold; margin-top: 15px; display: none; text-align: center; padding: 10px; border-radius: 5px; }
 .error-msg { background: #ffe6e6; color: #cc0000; border: 1px solid #cc0000; }
 .success-msg { background: #e6ffe6; color: #008000; border: 1px solid #008000; }
 .warning-msg { background: #fff5e6; color: #cc7a00; border: 1px solid #cc7a00; }
 
-/* --- ADMIN DASHBOARD STYLES --- */
+/* --- ADMIN TABLE --- */
 .admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #fff; }
 .admin-table th, .admin-table td { padding: 10px; border: 1px solid #ddd; text-align: left; font-size: 13px; }
 .admin-table th { background: var(--navy); color: white; }
@@ -65,19 +38,12 @@ body {
 .btn-revoke { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 11px; font-weight:bold;}
 .logout-btn { background: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; float: right; font-weight:bold; font-size: 12px;}
 
-/* --- EXISTING SELECTION TOOL STYLES --- */
-.selection-box {
-    background: #f9f9f9; max-width: 800px; margin: 0 auto 20px;
-    padding: 20px; border-radius: 8px; border: 1px solid #ddd;
-    display: none;
-}
+/* --- EXISTING TOOL STYLES --- */
+.selection-box { background: #f9f9f9; max-width: 800px; margin: 0 auto 20px; padding: 20px; border-radius: 8px; border: 1px solid #ddd; display: none; }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
 .input-group label { display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; }
 input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; }
-.gen-btn { 
-    width: 100%; padding: 12px; background: var(--navy); color: white; 
-    border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px;
-}
+.gen-btn { width: 100%; padding: 12px; background: var(--navy); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; }
 .gen-btn:hover { background: #111d42; }
 
 .report-wrapper { max-width: 900px; margin: 0 auto; display: none; background: #fff; }
@@ -88,7 +54,6 @@ input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius
 .version-info { font-size: 10px; font-weight: bold; margin-bottom: 3px; }
 table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid var(--border); margin-bottom: 0; }
 th, td { border: none; padding: 3px 5px; font-size: 9.5px; font-weight: bold; vertical-align: middle; line-height: 1.2; }
-.report-container > table tr, #efficiency-table tr, #physical-table tr, .hp-table tr { min-height: 22px; height: 22px; }
 .section-header { background: var(--navy) !important; color: white !important; text-align: center; font-weight: bold; padding: 4px 2px; font-size: 9.5px; text-transform: uppercase; border: 1px solid var(--border); border-bottom: none; margin-top: -1px; margin-bottom: 0; letter-spacing: 0.3px; }
 .first-header { margin-top: 10px !important; }
 .label-cell { background: #ffffff; width: 22%; }
@@ -96,15 +61,12 @@ th, td { border: none; padding: 3px 5px; font-size: 9.5px; font-weight: bold; ve
 .inner-table { width: 100%; border: none !important; table-layout: auto; margin-bottom: 0; }
 .inner-table td { border: none !important; padding: 2px 8px 2px 5px; min-height: 22px; height: 22px; }
 .inner-table td:last-child { text-align: right; padding-right: 10px; }
-.inner-table td:first-child { text-align: left; padding-left: 5px; }
-#efficiency-table .inner-table td { text-align: left; }
-#efficiency-table .inner-table td:last-child { text-align: right; padding-right: 12px; }
 .v-sep { border-left: 1px solid var(--border) !important; }
 .btn-bar { display: flex; justify-content: center; gap: 15px; margin-bottom: 8px; }
 .print-btn { background: #28a745; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; }
 .back-btn { background: #6c757d; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; }
 .perf-table th, .perf-table td { font-size: 8.5px; padding: 2px 1px; height: 21px; }
-#notes-area { border: 1px solid var(--border); padding: 10px 12px; font-size: 10.5px; font-weight: bold; min-height: 60px; line-height: 1.5; background: #fefefa; margin-top: 0; }
+#notes-area { border: 1px solid var(--border); padding: 10px 12px; font-size: 10.5px; font-weight: bold; min-height: 60px; background: #fefefa; margin-top: 0; }
 
 @media print {
     body { background: white; padding: 0; margin: 0; }
@@ -147,15 +109,10 @@ th, td { border: none; padding: 3px 5px; font-size: 9.5px; font-weight: bold; ve
     
     <table class="admin-table">
         <thead>
-            <tr>
-                <th>Customer Email</th>
-                <th>Password</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
+            <tr><th>Customer Email</th><th>Password</th><th>Status</th><th>Action</th></tr>
         </thead>
         <tbody id="admin-user-list">
-            <!-- Populated by JS -->
+            <tr><td colspan="4" style="text-align:center;">Loading requests...</td></tr>
         </tbody>
     </table>
 </div>
@@ -177,13 +134,8 @@ th, td { border: none; padding: 3px 5px; font-size: 9.5px; font-weight: bold; ve
                 <option value="HeatPump">Heat Pump</option>
             </select>
         </div>
-        
-        <div class="input-group"><label>Model</label>
-            <select id="model-select"></select>
-        </div>
-        <div class="input-group"><label>Condition</label>
-            <select id="cond-select"></select>
-        </div>
+        <div class="input-group"><label>Model</label><select id="model-select"></select></div>
+        <div class="input-group"><label>Condition</label><select id="cond-select"></select></div>
     </div>
     <button class="gen-btn" onclick="generateReport()">VIEW OFFICIAL REPORT</button>
 </div>
@@ -195,7 +147,7 @@ th, td { border: none; padding: 3px 5px; font-size: 9.5px; font-weight: bold; ve
         <button class="print-btn" onclick="downloadPDF()">⬇ DOWNLOAD PDF</button>
     </div>
     <div class="report-container" id="report-content">
-        <!-- ALL YOUR EXISTING REPORT HTML STAYS EXACTLY THE SAME -->
+        <!-- HEADER -->
         <div class="header-top">
             <div>
                 <div class="comp-name">KIRLOSKAR CHILLERS PRIVATE LIMITED</div>
@@ -203,10 +155,9 @@ th, td { border: none; padding: 3px 5px; font-size: 9.5px; font-weight: bold; ve
             </div>
             <img src="chillers_logo.png" alt="Kirloskar Logo" class="logo-img" onerror="this.style.display='none'">
         </div>
-        <div class="version-info">
-            Version : 1.1.0 | Release Date: 2026/03/31
-            <div style="float:right">Print Date: <span id="p-date"></span></div>
-        </div>
+        <div class="version-info">Version : 1.1.0 | Release Date: 2026/03/31<div style="float:right">Print Date: <span id="p-date"></span></div></div>
+        
+        <!-- DETAILS -->
         <div class="section-header first-header">PROJECT DETAILS</div>
         <table>
             <colgroup><col style="width:22%"><col style="width:28%"><col style="width:22%"><col style="width:28%"></colgroup>
@@ -239,19 +190,36 @@ th, td { border: none; padding: 3px 5px; font-size: 9.5px; font-weight: bold; ve
 
 <script>
 // ==========================================
-// LOGIN & ADMIN ACCESS CONTROL LOGIC
+// FIREBASE CLOUD DATABASE SETUP (CRITICAL)
 // ==========================================
 
-// Initialize "Database" in browser local storage
-function getUsers() {
-    let users = localStorage.getItem("kirloskar_users");
-    return users ? JSON.parse(users) : [];
+// ⚠️ PASTE YOUR FIREBASE CONFIGURATION HERE ⚠️
+// Go to Firebase Console -> Project Settings -> General -> Web App -> Copy config
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+// Initialize Firebase only if the user added their keys
+let db;
+if(firebaseConfig.apiKey !== "YOUR_API_KEY") {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
 }
 
-function saveUsers(users) {
-    localStorage.setItem("kirloskar_users", JSON.stringify(users));
+// Ensure Firebase keys don't have symbols that break the database
+function sanitizeEmail(email) {
+    return email.replace(/\./g, ',');
 }
 
+// ==========================================
+// CLOUD LOGIN & APPROVAL LOGIC
+// ==========================================
 function showMessage(text, type) {
     const msgDiv = document.getElementById('login-message');
     msgDiv.style.display = 'block';
@@ -268,89 +236,98 @@ function processLogin() {
         return;
     }
 
-    // 1. ADMIN LOGIN CHECK
+    // 1. ADMIN LOGIN
     if (email === 'admin' && pass === 'admin123') {
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('admin-dashboard').style.display = 'block';
-        loadAdminDashboard();
+        if(db) loadAdminDashboard();
+        else alert("Firebase is not configured! Check the code.");
         return;
     }
 
-    // 2. CUSTOMER LOGIN FLOW
-    let users = getUsers();
-    let existingUser = users.find(u => u.email === email);
-
-    if (existingUser) {
-        if (existingUser.password !== pass) {
-            showMessage("Incorrect password.", "error");
-        } else if (existingUser.status === 'pending') {
-            showMessage("Your account is pending admin approval. Please wait.", "warning");
-        } else if (existingUser.status === 'revoked') {
-            showMessage("Your access has been revoked by the administrator.", "error");
-        } else if (existingUser.status === 'approved') {
-            // SUCCESSFUL LOGIN
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('selection-form').style.display = 'block';
-        }
-    } else {
-        // FIRST TIME - CREATE REQUEST
-        users.push({ email: email, password: pass, status: 'pending' });
-        saveUsers(users);
-        showMessage("Access Requested! Please wait for the admin to approve your account.", "success");
-    }
-}
-
-function loadAdminDashboard() {
-    const users = getUsers();
-    const tbody = document.getElementById('admin-user-list');
-    tbody.innerHTML = '';
-
-    if(users.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No customers found.</td></tr>';
+    if(!db) {
+        showMessage("System Error: Cloud database not connected. Admin needs to add Firebase Config.", "error");
         return;
     }
 
-    users.forEach(u => {
-        let statusColor = u.status === 'approved' ? 'green' : (u.status === 'revoked' ? 'red' : 'orange');
-        let actionBtns = '';
+    // 2. CUSTOMER CLOUD LOGIN
+    let safeEmail = sanitizeEmail(email);
+    showMessage("Checking server...", "warning");
 
-        if (u.status !== 'approved') {
-            actionBtns += `<button class="btn-approve" onclick="changeStatus('${u.email}', 'approved')">Approve</button> `;
+    db.ref('users/' + safeEmail).once('value', snapshot => {
+        if(snapshot.exists()) {
+            let user = snapshot.val();
+            if (user.password !== pass) {
+                showMessage("Incorrect password.", "error");
+            } else if (user.status === 'pending') {
+                showMessage("Your account is pending admin approval. Please wait.", "warning");
+            } else if (user.status === 'revoked') {
+                showMessage("Your access has been revoked by the administrator.", "error");
+            } else if (user.status === 'approved') {
+                // SUCCESS!
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('selection-form').style.display = 'block';
+                document.getElementById('login-message').style.display = 'none';
+            }
+        } else {
+            // First time - write to cloud
+            db.ref('users/' + safeEmail).set({
+                email: email,
+                password: pass,
+                status: 'pending'
+            });
+            showMessage("Access Requested! Please wait for admin approval.", "success");
         }
-        if (u.status !== 'revoked') {
-            actionBtns += `<button class="btn-revoke" onclick="changeStatus('${u.email}', 'revoked')">Revoke</button>`;
-        }
-
-        tbody.innerHTML += `
-            <tr>
-                <td><b>${u.email}</b></td>
-                <td>${u.password}</td>
-                <td style="color:${statusColor}; font-weight:bold; text-transform:uppercase;">${u.status}</td>
-                <td>${actionBtns}</td>
-            </tr>
-        `;
     });
 }
 
-function changeStatus(email, newStatus) {
-    let users = getUsers();
-    let userIndex = users.findIndex(u => u.email === email);
-    if (userIndex !== -1) {
-        users[userIndex].status = newStatus;
-        saveUsers(users);
-        loadAdminDashboard(); // refresh table
-    }
+function loadAdminDashboard() {
+    // Listen to real-time changes on the cloud
+    db.ref('users').on('value', snapshot => {
+        const tbody = document.getElementById('admin-user-list');
+        tbody.innerHTML = '';
+        
+        if(!snapshot.exists()) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No customers found.</td></tr>';
+            return;
+        }
+
+        const users = snapshot.val();
+        for(let key in users) {
+            let u = users[key];
+            let statusColor = u.status === 'approved' ? 'green' : (u.status === 'revoked' ? 'red' : 'orange');
+            let actionBtns = '';
+
+            if (u.status !== 'approved') {
+                actionBtns += `<button class="btn-approve" onclick="changeStatus('${key}', 'approved')">Approve</button> `;
+            }
+            if (u.status !== 'revoked') {
+                actionBtns += `<button class="btn-revoke" onclick="changeStatus('${key}', 'revoked')">Revoke</button>`;
+            }
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${u.email}</b></td>
+                    <td>${u.password}</td>
+                    <td style="color:${statusColor}; font-weight:bold; text-transform:uppercase;">${u.status}</td>
+                    <td>${actionBtns}</td>
+                </tr>
+            `;
+        }
+    });
+}
+
+function changeStatus(safeEmail, newStatus) {
+    db.ref('users/' + safeEmail).update({ status: newStatus });
 }
 
 function logout() {
     document.getElementById('login-email').value = '';
     document.getElementById('login-password').value = '';
     document.getElementById('login-message').style.display = 'none';
-    
     document.getElementById('selection-form').style.display = 'none';
     document.getElementById('admin-dashboard').style.display = 'none';
     document.getElementById('report-wrapper').style.display = 'none';
-    
     document.getElementById('login-screen').style.display = 'block';
 }
 
@@ -359,7 +336,7 @@ function handleKeyPress(e) {
 }
 
 // ==========================================
-// REST OF YOUR EXISTING SELECTION TOOL CODE
+// EXISTING SELECTION TOOL LOGIC (unchanged)
 // ==========================================
 
 const chillerCSV = `Model,Condition,ModelName,NumCompressors,Refrigerant,NumFans,NumCoils,FlowDesign,FF,Alt,Passes,Mat,WB,L1,W1,H1,SW1,OW1,RC1,L2,W2,H2,RC2,SW2,OW2,OilCh,CompRLA1,CompRLA2,CompRLA3,CompRLA4,ResultVal,C100,P100,COP100,RLA100,F100,EI100,EO100,PD100,AM100,C75,P75,COP75,RLA75,F75,EI75,EO75,PD75,AM75,C50,P50,COP50,RLA50,F50,EI50,EO50,PD50,AM50,C25,P25,COP25,RLA25,F25,EI25,EO25,PD25,AM25,Elev_C,Elev_P,Elev_COP,Elev_RLA,Elev_F,Elev_EI,Elev_EO,Elev_PD,Elev_AM
@@ -398,10 +375,7 @@ function updateDropdowns() {
 }
 updateDropdowns();
 
-function goBack() {
-    document.getElementById('report-wrapper').style.display = 'none';
-    document.getElementById('selection-form').style.display = 'block';
-}
+function goBack() { document.getElementById('report-wrapper').style.display = 'none'; document.getElementById('selection-form').style.display = 'block'; }
 
 function generateReport() {
     const app = document.getElementById('app-select').value;
@@ -422,75 +396,42 @@ function generateReport() {
         const d = chillerDB.find(x => x.Model === mod && x.Condition === con);
         if(!d) return;
 
-        document.getElementById('chiller-sections').style.display = 'block';
-        document.getElementById('hp-sections').style.display = 'none';
-        
-        document.getElementById('d-app-type').innerText = 'Air Cooled Chiller';
-        document.getElementById('d-tech').innerText = 'Scroll';
-        document.getElementById('d-model-name').innerText = d.ModelName;
-        document.getElementById('d-condition').innerText = con;
+        document.getElementById('chiller-sections').style.display = 'block'; document.getElementById('hp-sections').style.display = 'none';
+        document.getElementById('d-app-type').innerText = 'Air Cooled Chiller'; document.getElementById('d-tech').innerText = 'Scroll';
+        document.getElementById('d-model-name').innerText = d.ModelName; document.getElementById('d-condition').innerText = con;
 
         const starLabel = (con === 'BEE') ? (BEE_STAR_LABELS[mod] || '3 Star') : '';
         if (con === 'BEE') {
             document.getElementById('d-bmg').innerText = starLabel.includes('2') ? 'BMGA2' : 'BMGA3';
-            document.getElementById('bmg-row').style.display = '';
-            document.getElementById('starter-row-ahri').style.display = 'none';
+            document.getElementById('bmg-row').style.display = ''; document.getElementById('starter-row-ahri').style.display = 'none';
         } else {
-            document.getElementById('bmg-row').style.display = 'none';
-            document.getElementById('starter-row-ahri').style.display = '';
+            document.getElementById('bmg-row').style.display = 'none'; document.getElementById('starter-row-ahri').style.display = '';
         }
 
         document.getElementById('comp-data').innerHTML = `<tr><td>No. of Compressors</td><td>${d.NumCompressors}</td></tr><tr><td>Hertz</td><td>50.0 Hz</td></tr><tr><td>Volts</td><td>415 V</td></tr><tr><td>Refrigerant</td><td>${d.Refrigerant}</td></tr>`;
         document.getElementById('evap-data').innerHTML = `<tr><td>Flow (m³/h)</td><td>${fmtFlow(d.FlowDesign)}</td></tr><tr><td>Entering Temp (°C)</td><td>12.0</td></tr><tr><td>Leaving Temp (°C)</td><td>7.0</td></tr><tr><td>No. of Passes</td><td>${d.Passes}</td></tr>`;
         document.getElementById('cond-data').innerHTML = `<tr><td>Ambient Temperature (°C)</td><td>${fmt2(d.AM100)}</td></tr><tr><td>No. of condenser Coils</td><td>${d.NumCoils}</td></tr><tr><td>No. of condenser Fans</td><td>${d.NumFans}</td></tr>`;
 
-        document.getElementById('efficiency-table').innerHTML = `
-            <tr><td class="label-cell"> Capacity (kW)</td><td>${fmt2(d.C100)}</td><td class="label-cell v-sep">75% Load COP</td><td>${fmt3(d.COP75)}</td></tr>
-            <tr><td class="label-cell">Power(kW)</td><td>${fmt2(d.P100)}</td><td class="label-cell v-sep">50% Load COP</td><td>${fmt3(d.COP50)}</td></tr>
-            <tr><td class="label-cell">COP (kW/kW)</td><td>${fmt3(d.COP100)}</td><td class="label-cell v-sep">25% Load COP</td><td>${fmt3(d.COP25)}</td></tr>
-            <tr><td class="label-cell">${con === 'BEE' ? 'ISEER' : 'IPLV'}</td><td>${fmt2(d.ResultVal)}</td><td class="label-cell v-sep">${con === 'BEE' ? 'BEE Star Rating' : ''}</td><td>${con === 'BEE' ? starLabel : ''}</td></tr>`;
+        document.getElementById('efficiency-table').innerHTML = `<tr><td class="label-cell"> Capacity (kW)</td><td>${fmt2(d.C100)}</td><td class="label-cell v-sep">75% Load COP</td><td>${fmt3(d.COP75)}</td></tr><tr><td class="label-cell">Power(kW)</td><td>${fmt2(d.P100)}</td><td class="label-cell v-sep">50% Load COP</td><td>${fmt3(d.COP50)}</td></tr><tr><td class="label-cell">COP (kW/kW)</td><td>${fmt3(d.COP100)}</td><td class="label-cell v-sep">25% Load COP</td><td>${fmt3(d.COP25)}</td></tr><tr><td class="label-cell">${con === 'BEE' ? 'ISEER' : 'IPLV'}</td><td>${fmt2(d.ResultVal)}</td><td class="label-cell v-sep">${con === 'BEE' ? 'BEE Star Rating' : ''}</td><td>${con === 'BEE' ? starLabel : ''}</td></tr>`;
 
         let phtml = `<tr><td>1</td><td>100</td><td>${fmt2(d.C100)}</td><td>${fmt2(d.P100)}</td><td>${fmt3(d.COP100)}</td><td>${fmtDynamic(d.RLA100)}</td><td>${fmtFlow(d.F100)}</td><td>${fmt2(d.EI100)}</td><td>${fmt2(d.EO100)}</td><td>${fmt2(d.PD100)}</td><td>${fmt2(d.AM100)}</td></tr>`;
         document.getElementById('perf-body').innerHTML = phtml;
-
-        const elevDisplay = (con === 'BEE') ? 'table' : 'none';
         document.getElementById('elevated-hdr').style.display = (con === 'BEE') ? 'block' : 'none';
-        document.getElementById('elevated-section').style.display = elevDisplay;
-
+        document.getElementById('elevated-section').style.display = (con === 'BEE') ? 'table' : 'none';
         document.getElementById('physical-table').innerHTML = `<tr><td style="padding:0; vertical-align:top;"><div style="padding:3px; background:#f2f2f2; text-align:center; font-weight:bold; border-bottom:1px solid var(--border);">OPTION 1</div><table class="inner-table"><tr><td style="width:50%">LxWxH (mm):</td><td>${d.L1}x${d.W1}x${d.H1}</td></tr><tr><td>Shipping Weight:</td><td>${d.SW1} kg</td></tr><tr><td>Operating Weight:</td><td>${d.OW1} kg</td></tr></table></td></tr>`;
 
     } else {
-        const hp = hpData.find(x => x.model === mod);
-        if(!hp) return;
-
-        document.getElementById('chiller-sections').style.display = 'none';
-        document.getElementById('hp-sections').style.display = 'block';
-
-        document.getElementById('d-app-type').innerText = 'Commercial Heat Pump';
-        document.getElementById('d-tech').innerText = hp.comp.split(' ')[0] || 'Scroll';
-        document.getElementById('d-model-name').innerText = hp.model;
-        document.getElementById('d-condition').innerText = 'User Specified';
-
-        document.getElementById('hp-sections').innerHTML = `
-            <table class="hp-table" style="margin-top: -1px;">
-                <tr><th style="border-bottom:1px solid var(--border); width: 33.3%;">Compressor</th><th class="v-sep" style="border-bottom:1px solid var(--border); width: 33.3%;">Evaporator</th><th class="v-sep" style="border-bottom:1px solid var(--border); width: 33.3%;">Condenser</th></tr>
-                <tr>
-                    <td style="padding:0; vertical-align:top;"><table class="inner-table"><tr><td style="width:60%">Type</td><td>${_v(hp.comp)}</td></tr><tr><td>No. of Compressors</td><td>${_v(hp.compQty)}</td></tr></table></td>
-                    <td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table"><tr><td style="width:60%">Type</td><td>${_v(hp.evap)}</td></tr><tr><td>Fan Quantity</td><td>${_v(hp.fanQty)}</td></tr></table></td>
-                    <td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table"><tr><td style="width:60%">Type Heat Exch.</td><td>${_v(hp.heatex)}</td></tr><tr><td>Water Flow (m³/h)</td><td>${_v(hp.flow)}</td></tr></table></td>
-                </tr>
-            </table>
-        `;
+        const hp = hpData.find(x => x.model === mod); if(!hp) return;
+        document.getElementById('chiller-sections').style.display = 'none'; document.getElementById('hp-sections').style.display = 'block';
+        document.getElementById('d-app-type').innerText = 'Commercial Heat Pump'; document.getElementById('d-tech').innerText = hp.comp.split(' ')[0] || 'Scroll';
+        document.getElementById('d-model-name').innerText = hp.model; document.getElementById('d-condition').innerText = 'User Specified';
+        document.getElementById('hp-sections').innerHTML = `<table class="hp-table" style="margin-top: -1px;"><tr><th style="border-bottom:1px solid var(--border); width: 33.3%;">Compressor</th><th class="v-sep" style="border-bottom:1px solid var(--border); width: 33.3%;">Evaporator</th><th class="v-sep" style="border-bottom:1px solid var(--border); width: 33.3%;">Condenser</th></tr><tr><td style="padding:0; vertical-align:top;"><table class="inner-table"><tr><td style="width:60%">Type</td><td>${_v(hp.comp)}</td></tr><tr><td>No. of Compressors</td><td>${_v(hp.compQty)}</td></tr></table></td><td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table"><tr><td style="width:60%">Type</td><td>${_v(hp.evap)}</td></tr><tr><td>Fan Quantity</td><td>${_v(hp.fanQty)}</td></tr></table></td><td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table"><tr><td style="width:60%">Type Heat Exch.</td><td>${_v(hp.heatex)}</td></tr><tr><td>Water Flow (m³/h)</td><td>${_v(hp.flow)}</td></tr></table></td></tr></table>`;
     }
 }
-
 function downloadPDF() {
     const element = document.getElementById('report-content');
-    const clientStr = document.getElementById('client').value || 'Client';
-    const projStr = document.getElementById('project').value || 'Project';
-    const filename = `Kirloskar_Report_${clientStr}_${projStr}.pdf`.replace(/\s+/g, '_');
-    const opt = { margin:[5, 5, 5, 5], filename: filename, image: { type: 'jpeg', quality: 1.0 }, html2canvas: { scale: 3, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-    html2pdf().set(opt).from(element).save();
+    const filename = `Kirloskar_Report_${document.getElementById('client').value}_${document.getElementById('project').value}.pdf`.replace(/\s+/g, '_');
+    html2pdf().set({ margin:[5, 5, 5, 5], filename: filename, image: { type: 'jpeg', quality: 1.0 }, html2canvas: { scale: 3, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(element).save();
 }
 </script>
 </body>
