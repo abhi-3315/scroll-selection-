@@ -1,308 +1,324 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kirloskar Selection Tool</title>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kirloskar Selection Tool</title>
 
-<!-- PDF Generator -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-<!-- FIREBASE CLOUD DATABASE (V8 for easy single-file use) -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+    :root {
+        --navy: #1a2a5e;
+        --border: #000000;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-<style>
-:root { --navy: #1a2a5e; --border: #000000; }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; padding: 8px; color: #000; }
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: #fff;
+        padding: 8px;
+        color: #000;
+    }
 
-/* --- LOGIN & ADMIN STYLES --- */
-#login-screen, #admin-dashboard {
-    max-width: 450px; margin: 80px auto; background: #f9f9f9; padding: 30px;
-    border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-#admin-dashboard { max-width: 700px; display: none; }
-.login-header { text-align: center; color: var(--navy); margin-bottom: 25px; }
-.login-header img { height: 50px; margin-bottom: 10px; }
-#login-message { font-size: 13px; font-weight: bold; margin-top: 15px; display: none; text-align: center; padding: 10px; border-radius: 5px; }
-.error-msg { background: #ffe6e6; color: #cc0000; border: 1px solid #cc0000; }
-.success-msg { background: #e6ffe6; color: #008000; border: 1px solid #008000; }
-.warning-msg { background: #fff5e6; color: #cc7a00; border: 1px solid #cc7a00; }
+    /* --- LOGIN SCREEN STYLES --- */
+    #login-screen, #admin-dashboard {
+        max-width: 450px;
+        margin: 80px auto;
+        background: #f9f9f9;
+        padding: 30px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    #admin-dashboard {
+        max-width: 700px;
+        display: none;
+    }
+    .login-header {
+        text-align: center;
+        color: var(--navy);
+        margin-bottom: 25px;
+    }
+    .login-header img {
+        height: 50px;
+        margin-bottom: 10px;
+    }
+    #login-message {
+        font-size: 13px;
+        font-weight: bold;
+        margin-top: 15px;
+        display: none;
+        text-align: center;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .error-msg { background: #ffe6e6; color: #cc0000; border: 1px solid #cc0000; }
+    .success-msg { background: #e6ffe6; color: #008000; border: 1px solid #008000; }
+    .warning-msg { background: #fff5e6; color: #cc7a00; border: 1px solid #cc7a00; }
 
-/* --- ADMIN TABLE --- */
-.admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #fff; }
-.admin-table th, .admin-table td { padding: 10px; border: 1px solid #ddd; text-align: left; font-size: 13px; }
-.admin-table th { background: var(--navy); color: white; }
-.btn-approve { background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 11px; font-weight:bold;}
-.btn-revoke { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 11px; font-weight:bold;}
-.logout-btn { background: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; float: right; font-weight:bold; font-size: 12px;}
+    /* --- ADMIN DASHBOARD STYLES --- */
+    .admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #fff; }
+    .admin-table th, .admin-table td { padding: 10px; border: 1px solid #ddd; text-align: left; font-size: 13px; }
+    .admin-table th { background: var(--navy); color: white; }
+    .btn-approve { background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 11px; font-weight:bold;}
+    .btn-revoke { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 11px; font-weight:bold;}
+    .logout-btn { background: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; float: right; font-weight:bold; font-size: 12px;}
 
-/* --- EXISTING TOOL STYLES --- */
-.selection-box { background: #f9f9f9; max-width: 800px; margin: 0 auto 20px; padding: 20px; border-radius: 8px; border: 1px solid #ddd; display: none; }
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-.input-group label { display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; }
-input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; }
-.gen-btn { width: 100%; padding: 12px; background: var(--navy); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; }
-.gen-btn:hover { background: #111d42; }
+    /* --- EXISTING SELECTION TOOL STYLES --- */
+    .selection-box {
+        background: #f9f9f9; max-width: 800px; margin: 0 auto 20px;
+        padding: 20px; border-radius: 8px; border: 1px solid #ddd;
+        display: none;
+    }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .input-group label { display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; }
+    input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; }
+    .gen-btn { 
+        width: 100%; padding: 12px; background: var(--navy); color: white; 
+        border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px;
+    }
+    .gen-btn:hover { background: #111d42; }
 
-.report-wrapper { max-width: 900px; margin: 0 auto; display: none; background: #fff; }
-.report-container { background: #fff; padding: 6px 10px; border: none; width: 200mm; max-width: 100%; margin: 0 auto; }
-.header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; }
-.comp-name { font-weight: bold; font-size: 14px; }
-.logo-img { height: 40px; width: auto; object-fit: contain; }
-.version-info { font-size: 10px; font-weight: bold; margin-bottom: 3px; }
-table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid var(--border); margin-bottom: 0; }
-th, td { border: none; padding: 3px 5px; font-size: 9.5px; font-weight: bold; vertical-align: middle; line-height: 1.2; }
-.section-header { background: var(--navy) !important; color: white !important; text-align: center; font-weight: bold; padding: 4px 2px; font-size: 9.5px; text-transform: uppercase; border: 1px solid var(--border); border-bottom: none; margin-top: -1px; margin-bottom: 0; letter-spacing: 0.3px; }
-.first-header { margin-top: 10px !important; }
-.label-cell { background: #ffffff; width: 22%; }
-.bordered-table th, .bordered-table td { border: 1px solid var(--border) !important; text-align: center; height: 22px; }
-.inner-table { width: 100%; border: none !important; table-layout: auto; margin-bottom: 0; }
-.inner-table td { border: none !important; padding: 2px 8px 2px 5px; min-height: 22px; height: 22px; }
-.inner-table td:last-child { text-align: right; padding-right: 10px; }
-.v-sep { border-left: 1px solid var(--border) !important; }
-.btn-bar { display: flex; justify-content: center; gap: 15px; margin-bottom: 8px; }
-.print-btn { background: #28a745; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; }
-.back-btn { background: #6c757d; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; }
-.perf-table th, .perf-table td { font-size: 8.5px; padding: 2px 1px; height: 21px; }
-#notes-area { border: 1px solid var(--border); padding: 10px 12px; font-size: 10.5px; font-weight: bold; min-height: 60px; background: #fefefa; margin-top: 0; }
+    .report-wrapper { max-width: 900px; margin: 0 auto; display: none; background: #fff; }
+    .report-container { background: #fff; padding: 6px 10px; border: none; width: 200mm; max-width: 100%; margin: 0 auto; }
+    .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; }
+    .comp-name { font-weight: bold; font-size: 14px; }
+    .logo-img { height: 40px; width: auto; object-fit: contain; }
+    .version-info { font-size: 10px; font-weight: bold; margin-bottom: 3px; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid var(--border); margin-bottom: 0; }
+    th, td { border: none; padding: 3px 5px; font-size: 9.5px; font-weight: bold; vertical-align: middle; line-height: 1.2; }
+    .report-container > table tr, #efficiency-table tr, #physical-table tr, .hp-table tr { min-height: 22px; height: 22px; }
+    .section-header { background: var(--navy) !important; color: white !important; text-align: center; font-weight: bold; padding: 4px 2px; font-size: 9.5px; text-transform: uppercase; border: 1px solid var(--border); border-bottom: none; margin-top: -1px; margin-bottom: 0; letter-spacing: 0.3px; }
+    .first-header { margin-top: 10px !important; }
+    .label-cell { background: #ffffff; width: 22%; }
+    .bordered-table th, .bordered-table td { border: 1px solid var(--border) !important; text-align: center; height: 22px; }
+    .inner-table { width: 100%; border: none !important; table-layout: auto; margin-bottom: 0; }
+    .inner-table td { border: none !important; padding: 2px 8px 2px 5px; min-height: 22px; height: 22px; }
+    .inner-table td:last-child { text-align: right; padding-right: 10px; }
+    .inner-table td:first-child { text-align: left; padding-left: 5px; }
+    #efficiency-table .inner-table td { text-align: left; }
+    #efficiency-table .inner-table td:last-child { text-align: right; padding-right: 12px; }
+    .v-sep { border-left: 1px solid var(--border) !important; }
+    .btn-bar { display: flex; justify-content: center; gap: 15px; margin-bottom: 8px; }
+    .print-btn { background: #28a745; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; }
+    .back-btn { background: #6c757d; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; }
+    .perf-table th, .perf-table td { font-size: 8.5px; padding: 2px 1px; height: 21px; }
+    #notes-area { border: 1px solid var(--border); padding: 10px 12px; font-size: 10.5px; font-weight: bold; min-height: 60px; line-height: 1.5; background: #fefefa; margin-top: 0; }
 
-@media print {
-    body { background: white; padding: 0; margin: 0; }
-    .btn-bar, .selection-box, #login-screen, #admin-dashboard { display: none !important; }
-    .report-wrapper { display: block !important; }
-    .report-container { border: none; padding: 3mm 4mm; width: 100%; margin: 0; }
-    @page { size: A4; margin: 4mm 5mm; }
-    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-}
-</style>
-</head>
-<body>
+    @media print {
+        body { background: white; padding: 0; margin: 0; }
+        .btn-bar, .selection-box, #login-screen, #admin-dashboard { display: none !important; }
+        .report-wrapper { display: block !important; }
+        .report-container { border: none; padding: 3mm 4mm; width: 100%; margin: 0; }
+        @page { size: A4; margin: 4mm 5mm; }
+        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    }
+    </style>
+    </head>
+    <body>
 
-<!-- LOGIN SCREEN -->
-<div id="login-screen">
-    <div class="login-header">
-        <img src="chillers_logo.png" alt="Logo" onerror="this.style.display='none'">
-        <h2>Kirloskar Selection Tool</h2>
-        <p style="font-size: 12px; color: #555; margin-top: 5px;">Customer Login / Request Access</p>
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen">
+        <div class="login-header">
+            <img src="chillers_logo.png" alt="Logo" onerror="this.style.display='none'">
+            <h2>Kirloskar Selection Tool</h2>
+            <p style="font-size: 12px; color: #555; margin-top: 5px;">Customer Login / Request Access</p>
+        </div>
+        <div class="input-group" style="margin-bottom: 15px;">
+            <label>Email Address / Username</label>
+            <input type="text" id="login-email" placeholder="Enter email" onkeypress="handleKeyPress(event)">
+        </div>
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="login-password" placeholder="Enter password" onkeypress="handleKeyPress(event)">
+        </div>
+        <div id="login-message"></div>
+        <button class="gen-btn" style="margin-top: 20px;" onclick="processLogin()">LOGIN / REQUEST ACCESS</button>
     </div>
-    <div class="input-group" style="margin-bottom: 15px;">
-        <label>Email Address / Username</label>
-        <input type="text" id="login-email" placeholder="Enter email" onkeypress="handleKeyPress(event)">
-    </div>
-    <div class="input-group">
-        <label>Password</label>
-        <input type="password" id="login-password" placeholder="Enter password" onkeypress="handleKeyPress(event)">
-    </div>
-    <div id="login-message"></div>
-    <button class="gen-btn" style="margin-top: 20px;" onclick="processLogin()">LOGIN / REQUEST ACCESS</button>
-</div>
 
-<!-- ADMIN DASHBOARD -->
-<div id="admin-dashboard">
-    <button class="logout-btn" onclick="logout()">Logout</button>
-    <div class="login-header" style="text-align: left;">
-        <h2 style="margin-bottom:0;">Admin Dashboard</h2>
-        <p style="font-size: 12px; color: #555; margin-top: 5px;">Manage Customer Access Requests</p>
-    </div>
-    
-    <table class="admin-table">
-        <thead>
-            <tr><th>Customer Email</th><th>Password</th><th>Status</th><th>Action</th></tr>
-        </thead>
-        <tbody id="admin-user-list">
-            <tr><td colspan="4" style="text-align:center;">Loading requests...</td></tr>
-        </tbody>
-    </table>
-</div>
-
-<!-- SELECTION TOOL -->
-<div class="selection-box" id="selection-form">
-    <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:15px;">
-        <h2 style="color:var(--navy);">Kirloskar Selection Tool</h2>
+    <!-- ADMIN DASHBOARD -->
+    <div id="admin-dashboard">
         <button class="logout-btn" onclick="logout()">Logout</button>
-    </div>
-    <div class="grid">
-        <div class="input-group"><label>Client Name</label><input type="text" id="client" value="KCPL"></div>
-        <div class="input-group"><label>Project Name</label><input type="text" id="project" value=""></div>
-        <div class="input-group"><label>Project Incharge</label><input type="text" id="proj-incharge" value=""></div>
-        
-        <div class="input-group"><label>Application</label>
-            <select id="app-select" onchange="updateDropdowns()">
-                <option value="Chiller">Chiller</option>
-                <option value="HeatPump">Heat Pump</option>
-            </select>
+        <div class="login-header" style="text-align: left;">
+            <h2 style="margin-bottom:0;">Admin Dashboard</h2>
+            <p style="font-size: 12px; color: #555; margin-top: 5px;">Manage Customer Access Requests</p>
         </div>
-        <div class="input-group"><label>Model</label><select id="model-select"></select></div>
-        <div class="input-group"><label>Condition</label><select id="cond-select"></select></div>
-    </div>
-    <button class="gen-btn" onclick="generateReport()">VIEW OFFICIAL REPORT</button>
-</div>
-
-<!-- REPORT SCREEN -->
-<div class="report-wrapper" id="report-wrapper">
-    <div class="btn-bar">
-        <button class="back-btn" onclick="goBack()">← BACK TO EDIT</button>
-        <button class="print-btn" onclick="downloadPDF()">⬇ DOWNLOAD PDF</button>
-    </div>
-    <div class="report-container" id="report-content">
-        <!-- HEADER -->
-        <div class="header-top">
-            <div>
-                <div class="comp-name">KIRLOSKAR CHILLERS PRIVATE LIMITED</div>
-                <div style="font-size:10px;">A Kirloskar Group Company</div>
-            </div>
-            <img src="chillers_logo.png" alt="Kirloskar Logo" class="logo-img" onerror="this.style.display='none'">
-        </div>
-        <div class="version-info">Version : 1.1.0 | Release Date: 2026/03/31<div style="float:right">Print Date: <span id="p-date"></span></div></div>
         
-        <!-- DETAILS -->
-        <div class="section-header first-header">PROJECT DETAILS</div>
-        <table>
-            <colgroup><col style="width:22%"><col style="width:28%"><col style="width:22%"><col style="width:28%"></colgroup>
-            <tr><td class="label-cell">Client</td><td class="v-sep" id="d-client"></td><td class="label-cell v-sep">Appliance/Type</td><td class="v-sep" id="d-app-type"></td></tr>
-            <tr><td class="label-cell">Project Name</td><td class="v-sep" id="d-project"></td><td class="label-cell v-sep">Cooling/Heating Tech</td><td class="v-sep" id="d-tech"></td></tr>
-            <tr><td class="label-cell">Project Incharge</td><td class="v-sep" id="d-incharge"></td><td class="label-cell v-sep">Brand</td><td class="v-sep">Kirloskar Chillers</td></tr>
-            <tr><td class="label-cell">Model</td><td class="v-sep" id="d-model-name"></td><td class="label-cell v-sep">Condition</td><td class="v-sep" id="d-condition"></td></tr>
-            <tr id="bmg-row"><td class="label-cell">BMG</td><td class="v-sep" id="d-bmg"></td><td class="label-cell v-sep">Starter Type</td><td class="v-sep">Star Delta</td></tr>
-            <tr id="starter-row-ahri" style="display:none;"><td class="label-cell">Starter Type</td><td class="v-sep">Star Delta</td><td class="label-cell v-sep"></td><td class="v-sep"></td></tr>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Customer Email</th>
+                    <th>Password</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="admin-user-list">
+                <!-- Populated by JS -->
+            </tbody>
         </table>
-
-        <!-- CHILLER SECTIONS -->
-        <div id="chiller-sections">
-            <div class="section-header" id="d-rating-hdr">RATED PERFORMANCE</div>
-            <table><tr><th style="border-bottom:1px solid var(--border);">Compressor</th><th class="v-sep" style="border-bottom:1px solid var(--border);">Evaporator</th><th class="v-sep" style="border-bottom:1px solid var(--border);">Air Cooled Condenser</th></tr>
-            <tr><td style="padding:0; vertical-align:top;"><table class="inner-table" id="comp-data"></table></td><td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table" id="evap-data"></table></td><td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table" id="cond-data"></table></td></tr></table>
-            <div class="section-header" id="d-eff-hdr">EFFICIENCY</div><table id="efficiency-table"></table>
-            <div class="section-header" id="d-perf-hdr">PERFORMANCE DETAILS</div>
-            <table class="perf-table bordered-table"><thead><tr><th rowspan="2">load pts</th><th rowspan="2">% Load</th><th rowspan="2">Capacity(kW)</th><th rowspan="2">Power(kW)</th><th rowspan="2">COP</th><th rowspan="2">RLA(A)</th><th colspan="4">Evaporator</th><th colspan="1">Condenser</th></tr><tr><th>Flow</th><th>T in</th><th>T out</th><th>Pd</th><th>Ambient</th></tr></thead><tbody id="perf-body"></tbody></table>
-            <div class="section-header" id="elevated-hdr">ELEVATED TEMPERATURE</div>
-            <table class="perf-table bordered-table" id="elevated-section"><thead><tr><th rowspan="2">load pts</th><th rowspan="2">% Load</th><th rowspan="2">Capacity(kW)</th><th rowspan="2">Power(kW)</th><th rowspan="2">COP</th><th rowspan="2">RLA(A)</th><th colspan="4">Evaporator</th><th colspan="1">Condenser</th></tr><tr><th>Flow</th><th>T in</th><th>T out</th><th>Pd</th><th>Ambient</th></tr></thead><tbody id="elevated-perf-body"></tbody></table>
-            <div class="section-header">PHYSICAL DATA</div><table id="physical-table"></table>
-        </div>
-
-        <!-- HEAT PUMP SECTIONS -->
-        <div id="hp-sections" style="display:none;"></div>
-        <div class="section-header">NOTES</div><div id="notes-area"></div>
     </div>
-</div>
 
-<script>
-// ==========================================
-// FIREBASE CLOUD DATABASE SETUP (CRITICAL)
-// ==========================================
+    <!-- SELECTION TOOL -->
+    <div class="selection-box" id="selection-form">
+        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:15px;">
+            <h2 style="color:var(--navy);">Kirloskar Selection Tool</h2>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+        <div class="grid">
+            <div class="input-group"><label>Client Name</label><input type="text" id="client" value="KCPL"></div>
+            <div class="input-group"><label>Project Name</label><input type="text" id="project" value=""></div>
+            <div class="input-group"><label>Project Incharge</label><input type="text" id="proj-incharge" value=""></div>
+            
+            <div class="input-group"><label>Application</label>
+                <select id="app-select" onchange="updateDropdowns()">
+                    <option value="Chiller">Chiller</option>
+                    <option value="HeatPump">Heat Pump</option>
+                </select>
+            </div>
+            
+            <div class="input-group"><label>Model</label>
+                <select id="model-select"></select>
+            </div>
+            <div class="input-group"><label>Condition</label>
+                <select id="cond-select"></select>
+            </div>
+        </div>
+        <button class="gen-btn" onclick="generateReport()">VIEW OFFICIAL REPORT</button>
+    </div>
 
-// ⚠️ PASTE YOUR FIREBASE CONFIGURATION HERE ⚠️
-// Go to Firebase Console -> Project Settings -> General -> Web App -> Copy config
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
+    <!-- REPORT SCREEN -->
+    <div class="report-wrapper" id="report-wrapper">
+        <div class="btn-bar">
+            <button class="back-btn" onclick="goBack()">← BACK TO EDIT</button>
+            <button class="print-btn" onclick="downloadPDF()">⬇ DOWNLOAD PDF</button>
+        </div>
+        <div class="report-container" id="report-content">
+            <!-- ALL YOUR EXISTING REPORT HTML STAYS EXACTLY THE SAME -->
+            <div class="header-top">
+                <div>
+                    <div class="comp-name">KIRLOSKAR CHILLERS PRIVATE LIMITED</div>
+                    <div style="font-size:10px;">A Kirloskar Group Company</div>
+                </div>
+                <img src="chillers_logo.png" alt="Kirloskar Logo" class="logo-img" onerror="this.style.display='none'">
+            </div>
+            <div class="version-info">
+                Version : 1.1.0 | Release Date: 2026/03/31
+                <div style="float:right">Print Date: <span id="p-date"></span></div>
+            </div>
+            <div class="section-header first-header">PROJECT DETAILS</div>
+            <table>
+                <colgroup><col style="width:22%"><col style="width:28%"><col style="width:22%"><col style="width:28%"></colgroup>
+                <tr><td class="label-cell">Client</td><td class="v-sep" id="d-client"></td><td class="label-cell v-sep">Appliance/Type</td><td class="v-sep" id="d-app-type"></td></tr>
+                <tr><td class="label-cell">Project Name</td><td class="v-sep" id="d-project"></td><td class="label-cell v-sep">Cooling/Heating Tech</td><td class="v-sep" id="d-tech"></td></tr>
+                <tr><td class="label-cell">Project Incharge</td><td class="v-sep" id="d-incharge"></td><td class="label-cell v-sep">Brand</td><td class="v-sep">Kirloskar Chillers</td></tr>
+                <tr><td class="label-cell">Model</td><td class="v-sep" id="d-model-name"></td><td class="label-cell v-sep">Condition</td><td class="v-sep" id="d-condition"></td></tr>
+                <tr id="bmg-row"><td class="label-cell">BMG</td><td class="v-sep" id="d-bmg"></td><td class="label-cell v-sep">Starter Type</td><td class="v-sep">Star Delta</td></tr>
+                <tr id="starter-row-ahri" style="display:none;"><td class="label-cell">Starter Type</td><td class="v-sep">Star Delta</td><td class="label-cell v-sep"></td><td class="v-sep"></td></tr>
+            </table>
 
-// Initialize Firebase only if the user added their keys
-let db;
-if(firebaseConfig.apiKey !== "YOUR_API_KEY") {
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.database();
-}
+            <!-- CHILLER SECTIONS -->
+            <div id="chiller-sections">
+                <div class="section-header" id="d-rating-hdr">RATED PERFORMANCE</div>
+                <table><tr><th style="border-bottom:1px solid var(--border);">Compressor</th><th class="v-sep" style="border-bottom:1px solid var(--border);">Evaporator</th><th class="v-sep" style="border-bottom:1px solid var(--border);">Air Cooled Condenser</th></tr>
+                <tr><td style="padding:0; vertical-align:top;"><table class="inner-table" id="comp-data"></table></td><td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table" id="evap-data"></table></td><td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table" id="cond-data"></table></td></tr></table>
+                <div class="section-header" id="d-eff-hdr">EFFICIENCY</div><table id="efficiency-table"></table>
+                <div class="section-header" id="d-perf-hdr">PERFORMANCE DETAILS</div>
+                <table class="perf-table bordered-table"><thead><tr><th rowspan="2">load pts</th><th rowspan="2">% Load</th><th rowspan="2">Capacity(kW)</th><th rowspan="2">Power(kW)</th><th rowspan="2">COP</th><th rowspan="2">RLA(A)</th><th colspan="4">Evaporator</th><th colspan="1">Condenser</th></tr><tr><th>Flow</th><th>T in</th><th>T out</th><th>Pd</th><th>Ambient</th></tr></thead><tbody id="perf-body"></tbody></table>
+                <div class="section-header" id="elevated-hdr">ELEVATED TEMPERATURE</div>
+                <table class="perf-table bordered-table" id="elevated-section"><thead><tr><th rowspan="2">load pts</th><th rowspan="2">% Load</th><th rowspan="2">Capacity(kW)</th><th rowspan="2">Power(kW)</th><th rowspan="2">COP</th><th rowspan="2">RLA(A)</th><th colspan="4">Evaporator</th><th colspan="1">Condenser</th></tr><tr><th>Flow</th><th>T in</th><th>T out</th><th>Pd</th><th>Ambient</th></tr></thead><tbody id="elevated-perf-body"></tbody></table>
+                <div class="section-header">PHYSICAL DATA</div><table id="physical-table"></table>
+            </div>
 
-// Ensure Firebase keys don't have symbols that break the database
-function sanitizeEmail(email) {
-    return email.replace(/\./g, ',');
-}
+            <!-- HEAT PUMP SECTIONS -->
+            <div id="hp-sections" style="display:none;"></div>
+            <div class="section-header">NOTES</div><div id="notes-area"></div>
+        </div>
+    </div>
 
-// ==========================================
-// CLOUD LOGIN & APPROVAL LOGIC
-// ==========================================
-function showMessage(text, type) {
-    const msgDiv = document.getElementById('login-message');
-    msgDiv.style.display = 'block';
-    msgDiv.className = type + '-msg';
-    msgDiv.innerText = text;
-}
+    <script>
+    // ==========================================
+    // LOGIN & ADMIN ACCESS CONTROL LOGIC
+    // ==========================================
 
-function processLogin() {
-    const email = document.getElementById('login-email').value.trim().toLowerCase();
-    const pass = document.getElementById('login-password').value;
-
-    if (!email || !pass) {
-        showMessage("Please enter both Email and Password.", "error");
-        return;
+    // Initialize "Database" in browser local storage
+    function getUsers() {
+        let users = localStorage.getItem("kirloskar_users");
+        return users ? JSON.parse(users) : [];
     }
 
-    // 1. ADMIN LOGIN
-    if (email === 'admin' && pass === 'admin123') {
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('admin-dashboard').style.display = 'block';
-        if(db) loadAdminDashboard();
-        else alert("Firebase is not configured! Check the code.");
-        return;
+    function saveUsers(users) {
+        localStorage.setItem("kirloskar_users", JSON.stringify(users));
     }
 
-    if(!db) {
-        showMessage("System Error: Cloud database not connected. Admin needs to add Firebase Config.", "error");
-        return;
+    function showMessage(text, type) {
+        const msgDiv = document.getElementById('login-message');
+        msgDiv.style.display = 'block';
+        msgDiv.className = type + '-msg';
+        msgDiv.innerText = text;
     }
 
-    // 2. CUSTOMER CLOUD LOGIN
-    let safeEmail = sanitizeEmail(email);
-    showMessage("Checking server...", "warning");
+    function processLogin() {
+        const email = document.getElementById('login-email').value.trim().toLowerCase();
+        const pass = document.getElementById('login-password').value;
 
-    db.ref('users/' + safeEmail).once('value', snapshot => {
-        if(snapshot.exists()) {
-            let user = snapshot.val();
-            if (user.password !== pass) {
+        if (!email || !pass) {
+            showMessage("Please enter both Email and Password.", "error");
+            return;
+        }
+
+        // 1. ADMIN LOGIN CHECK
+        if (email === 'admin' && pass === 'admin123') {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('admin-dashboard').style.display = 'block';
+            loadAdminDashboard();
+            return;
+        }
+
+        // 2. CUSTOMER LOGIN FLOW
+        let users = getUsers();
+        let existingUser = users.find(u => u.email === email);
+
+        if (existingUser) {
+            if (existingUser.password !== pass) {
                 showMessage("Incorrect password.", "error");
-            } else if (user.status === 'pending') {
+            } else if (existingUser.status === 'pending') {
                 showMessage("Your account is pending admin approval. Please wait.", "warning");
-            } else if (user.status === 'revoked') {
+            } else if (existingUser.status === 'revoked') {
                 showMessage("Your access has been revoked by the administrator.", "error");
-            } else if (user.status === 'approved') {
-                // SUCCESS!
+            } else if (existingUser.status === 'approved') {
+                // SUCCESSFUL LOGIN
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('selection-form').style.display = 'block';
-                document.getElementById('login-message').style.display = 'none';
             }
         } else {
-            // First time - write to cloud
-            db.ref('users/' + safeEmail).set({
-                email: email,
-                password: pass,
-                status: 'pending'
-            });
-            showMessage("Access Requested! Please wait for admin approval.", "success");
+            // FIRST TIME - CREATE REQUEST
+            users.push({ email: email, password: pass, status: 'pending' });
+            saveUsers(users);
+            showMessage("Access Requested! Please wait for the admin to approve your account.", "success");
         }
-    });
-}
+    }
 
-function loadAdminDashboard() {
-    // Listen to real-time changes on the cloud
-    db.ref('users').on('value', snapshot => {
+    function loadAdminDashboard() {
+        const users = getUsers();
         const tbody = document.getElementById('admin-user-list');
         tbody.innerHTML = '';
-        
-        if(!snapshot.exists()) {
+
+        if(users.length === 0) {
             tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No customers found.</td></tr>';
             return;
         }
 
-        const users = snapshot.val();
-        for(let key in users) {
-            let u = users[key];
+        users.forEach(u => {
             let statusColor = u.status === 'approved' ? 'green' : (u.status === 'revoked' ? 'red' : 'orange');
             let actionBtns = '';
 
             if (u.status !== 'approved') {
-                actionBtns += `<button class="btn-approve" onclick="changeStatus('${key}', 'approved')">Approve</button> `;
+                actionBtns += `<button class="btn-approve" onclick="changeStatus('${u.email}', 'approved')">Approve</button> `;
             }
             if (u.status !== 'revoked') {
-                actionBtns += `<button class="btn-revoke" onclick="changeStatus('${key}', 'revoked')">Revoke</button>`;
+                actionBtns += `<button class="btn-revoke" onclick="changeStatus('${u.email}', 'revoked')">Revoke</button>`;
             }
 
             tbody.innerHTML += `
@@ -313,126 +329,169 @@ function loadAdminDashboard() {
                     <td>${actionBtns}</td>
                 </tr>
             `;
-        }
-    });
-}
-
-function changeStatus(safeEmail, newStatus) {
-    db.ref('users/' + safeEmail).update({ status: newStatus });
-}
-
-function logout() {
-    document.getElementById('login-email').value = '';
-    document.getElementById('login-password').value = '';
-    document.getElementById('login-message').style.display = 'none';
-    document.getElementById('selection-form').style.display = 'none';
-    document.getElementById('admin-dashboard').style.display = 'none';
-    document.getElementById('report-wrapper').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'block';
-}
-
-function handleKeyPress(e) {
-    if (e.key === 'Enter') processLogin();
-}
-
-// ==========================================
-// EXISTING SELECTION TOOL LOGIC (unchanged)
-// ==========================================
-
-const chillerCSV = `Model,Condition,ModelName,NumCompressors,Refrigerant,NumFans,NumCoils,FlowDesign,FF,Alt,Passes,Mat,WB,L1,W1,H1,SW1,OW1,RC1,L2,W2,H2,RC2,SW2,OW2,OilCh,CompRLA1,CompRLA2,CompRLA3,CompRLA4,ResultVal,C100,P100,COP100,RLA100,F100,EI100,EO100,PD100,AM100,C75,P75,COP75,RLA75,F75,EI75,EO75,PD75,AM75,C50,P50,COP50,RLA50,F50,EI50,EO50,PD50,AM50,C25,P25,COP25,RLA25,F25,EI25,EO25,PD25,AM25,Elev_C,Elev_P,Elev_COP,Elev_RLA,Elev_F,Elev_EI,Elev_EO,Elev_PD,Elev_AM
-KAC011,BEE,KAC011.20,2,R410A,2,2,6.147,0.018,0,1,Cu,NA,1721,1140,1469,436,561,11,2071,949,1436,11,436,561,NA,11.1,11.1,NA,NA,3.38,35.72,12.70,2.813,22.2,6.147,12.00,7.0,40,35.0,26.790,10.31,2.598,19.05,6.147,10.75,7.0,40,27.0,17.860,4.05,4.412,8.487,6.147,9.50,7.0,40,19.00,8.93000000000,3.09,2.893,7.849,6.147,8.25,7.0,40,13.00,33.36,13.60,2.450,23.6,6.147,12,7,40,39
-KAC011,AHRI,KAC011.20,2,R410A,2,2,6.147,0.018,0,1,Cu,NA,1721,1140,1469,436,561,11,2071,949,1436,11,436,561,NA,11.1,11.1,NA,NA,3.33,36.660,12.70,2.887,22.2,6.147,12.00,7.0,40,35.0,27.495,10.31,2.667,19.05,6.147,10.75,7.0,40,27.0,18.330,4.05,4.528,8.487,6.147,9.50,7.0,40,19.00,9.165,3.09,2.969,7.849,6.147,8.25,7.0,40,13.00,33.36,13.60,2.450,23.6,6.147,12,7,40,39`;
-
-let chillerDB = [];
-const lines = chillerCSV.trim().split('\n');
-const headers = lines[0].split(',');
-chillerDB = lines.slice(1).map(l => { const v = l.split(','); let o = {}; headers.forEach((h, i) => o[h] = v[i]); return o; });
-
-const hpData = [
-    { model: 'KSE-AH-14U', cap: 14, cop: 4.2, hotWater: '400', ratedTemp: '55', maxTemp: '60', power: '3.8', current: '6.4', supply: '380~415V/50Hz/3Ph', comp: 'Scroll', compQty: 1, heatex: 'Tube-in-Shell', evap: 'Blue Finned', throttle: 'TXV', flow: '2.5', fanQty: 1, ref: 'R410A', noise: '≤65', pipe: 'R1', dim: '800 × 800 × 1110', weight: 140 }
-];
-
-const BEE_STAR_LABELS = { 'KAC011': '2 Star', 'KAC022': '2 Star', 'KAC044': '3 Star' };
-
-function fmt2(val) { let n = parseFloat(val); return isNaN(n) ? val : n.toFixed(2); }
-function fmt3(val) { let n = parseFloat(val); return isNaN(n) ? val : n.toFixed(3); }
-function fmtDynamic(val) { let n = parseFloat(val); if(isNaN(n)) return val; return Math.floor(Math.abs(n)) >= 10 ? n.toFixed(2) : n.toFixed(3); }
-function fmtFlow(val) { let n = parseFloat(val); if(isNaN(n)) return val; return Math.floor(Math.abs(n)) >= 10 ? n.toFixed(2) : n.toFixed(3); }
-function _v(val) { return (val === undefined || val === null || val === 'N/A' || val === 'NA' || val.toString().trim() === '') ? '-' : val; }
-
-function updateDropdowns() {
-    const app = document.getElementById('app-select').value;
-    const modelSelect = document.getElementById('model-select');
-    const condSelect = document.getElementById('cond-select');
-    modelSelect.innerHTML = ''; condSelect.innerHTML = '';
-    if (app === 'Chiller') {
-        modelSelect.innerHTML = `<option value="KAC011">KAC011.20</option>`;
-        condSelect.innerHTML = `<option value="BEE">BEE Condition</option><option value="AHRI">AHRI Condition</option>`;
-    } else {
-        hpData.forEach(hp => { let opt = document.createElement('option'); opt.value = hp.model; opt.text = hp.model; modelSelect.appendChild(opt); });
-        condSelect.innerHTML = `<option value="UserSpecified">User Specified</option>`;
+        });
     }
-}
-updateDropdowns();
 
-function goBack() { document.getElementById('report-wrapper').style.display = 'none'; document.getElementById('selection-form').style.display = 'block'; }
+    function changeStatus(email, newStatus) {
+        let users = getUsers();
+        let userIndex = users.findIndex(u => u.email === email);
+        if (userIndex !== -1) {
+            users[userIndex].status = newStatus;
+            saveUsers(users);
+            loadAdminDashboard(); // refresh table
+        }
+    }
 
-function generateReport() {
-    const app = document.getElementById('app-select').value;
-    const mod = document.getElementById('model-select').value;
-    const con = document.getElementById('cond-select').value;
+    function logout() {
+        document.getElementById('login-email').value = '';
+        document.getElementById('login-password').value = '';
+        document.getElementById('login-message').style.display = 'none';
+        
+        document.getElementById('selection-form').style.display = 'none';
+        document.getElementById('admin-dashboard').style.display = 'none';
+        document.getElementById('report-wrapper').style.display = 'none';
+        
+        document.getElementById('login-screen').style.display = 'block';
+    }
 
-    document.getElementById('selection-form').style.display = 'none';
-    document.getElementById('report-wrapper').style.display = 'block';
-    document.getElementById('p-date').innerText = new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    function handleKeyPress(e) {
+        if (e.key === 'Enter') processLogin();
+    }
 
-    document.getElementById('d-client').innerText = document.getElementById('client').value || '—';
-    document.getElementById('d-project').innerText = document.getElementById('project').value || '—';
-    document.getElementById('d-incharge').innerText = document.getElementById('proj-incharge').value || '—';
+    // ==========================================
+    // REST OF YOUR EXISTING SELECTION TOOL CODE
+    // ==========================================
 
-    let notes = document.getElementById('notes-area');
+    const chillerCSV = `Model,Condition,ModelName,NumCompressors,Refrigerant,NumFans,NumCoils,FlowDesign,FF,Alt,Passes,Mat,WB,L1,W1,H1,SW1,OW1,RC1,L2,W2,H2,RC2,SW2,OW2,OilCh,CompRLA1,CompRLA2,CompRLA3,CompRLA4,ResultVal,C100,P100,COP100,RLA100,F100,EI100,EO100,PD100,AM100,C75,P75,COP75,RLA75,F75,EI75,EO75,PD75,AM75,C50,P50,COP50,RLA50,F50,EI50,EO50,PD50,AM50,C25,P25,COP25,RLA25,F25,EI25,EO25,PD25,AM25,Elev_C,Elev_P,Elev_COP,Elev_RLA,Elev_F,Elev_EI,Elev_EO,Elev_PD,Elev_AM
+    KAC011,BEE,KAC011.20,2,R410A,2,2,6.147,0.018,0,1,Cu,NA,1721,1140,1469,436,561,11,2071,949,1436,11,436,561,NA,11.1,11.1,NA,NA,3.38,35.72,12.70,2.813,22.2,6.147,12.00,7.0,40,35.0,26.790,10.31,2.598,19.05,6.147,10.75,7.0,40,27.0,17.860,4.05,4.412,8.487,6.147,9.50,7.0,40,19.00,8.93000000000,3.09,2.893,7.849,6.147,8.25,7.0,40,13.00,33.36,13.60,2.450,23.6,6.147,12,7,40,39
+    KAC011,AHRI,KAC011.20,2,R410A,2,2,6.147,0.018,0,1,Cu,NA,1721,1140,1469,436,561,11,2071,949,1436,11,436,561,NA,11.1,11.1,NA,NA,3.33,36.660,12.70,2.887,22.2,6.147,12.00,7.0,40,35.0,27.495,10.31,2.667,19.05,6.147,10.75,7.0,40,27.0,18.330,4.05,4.528,8.487,6.147,9.50,7.0,40,19.00,9.165,3.09,2.969,7.849,6.147,8.25,7.0,40,13.00,33.36,13.60,2.450,23.6,6.147,12,7,40,39`;
 
-    if (app === 'Chiller') {
-        const d = chillerDB.find(x => x.Model === mod && x.Condition === con);
-        if(!d) return;
+    let chillerDB = [];
+    const lines = chillerCSV.trim().split('\n');
+    const headers = lines[0].split(',');
+    chillerDB = lines.slice(1).map(l => { const v = l.split(','); let o = {}; headers.forEach((h, i) => o[h] = v[i]); return o; });
 
-        document.getElementById('chiller-sections').style.display = 'block'; document.getElementById('hp-sections').style.display = 'none';
-        document.getElementById('d-app-type').innerText = 'Air Cooled Chiller'; document.getElementById('d-tech').innerText = 'Scroll';
-        document.getElementById('d-model-name').innerText = d.ModelName; document.getElementById('d-condition').innerText = con;
+    const hpData = [
+        { model: 'KSE-AH-14U', cap: 14, cop: 4.2, hotWater: '400', ratedTemp: '55', maxTemp: '60', power: '3.8', current: '6.4', supply: '380~415V/50Hz/3Ph', comp: 'Scroll', compQty: 1, heatex: 'Tube-in-Shell', evap: 'Blue Finned', throttle: 'TXV', flow: '2.5', fanQty: 1, ref: 'R410A', noise: '≤65', pipe: 'R1', dim: '800 × 800 × 1110', weight: 140 }
+    ];
 
-        const starLabel = (con === 'BEE') ? (BEE_STAR_LABELS[mod] || '3 Star') : '';
-        if (con === 'BEE') {
-            document.getElementById('d-bmg').innerText = starLabel.includes('2') ? 'BMGA2' : 'BMGA3';
-            document.getElementById('bmg-row').style.display = ''; document.getElementById('starter-row-ahri').style.display = 'none';
+    const BEE_STAR_LABELS = { 'KAC011': '2 Star', 'KAC022': '2 Star', 'KAC044': '3 Star' };
+
+    function fmt2(val) { let n = parseFloat(val); return isNaN(n) ? val : n.toFixed(2); }
+    function fmt3(val) { let n = parseFloat(val); return isNaN(n) ? val : n.toFixed(3); }
+    function fmtDynamic(val) { let n = parseFloat(val); if(isNaN(n)) return val; return Math.floor(Math.abs(n)) >= 10 ? n.toFixed(2) : n.toFixed(3); }
+    function fmtFlow(val) { let n = parseFloat(val); if(isNaN(n)) return val; return Math.floor(Math.abs(n)) >= 10 ? n.toFixed(2) : n.toFixed(3); }
+    function _v(val) { return (val === undefined || val === null || val === 'N/A' || val === 'NA' || val.toString().trim() === '') ? '-' : val; }
+
+    function updateDropdowns() {
+        const app = document.getElementById('app-select').value;
+        const modelSelect = document.getElementById('model-select');
+        const condSelect = document.getElementById('cond-select');
+        modelSelect.innerHTML = ''; condSelect.innerHTML = '';
+        if (app === 'Chiller') {
+            modelSelect.innerHTML = `<option value="KAC011">KAC011.20</option>`;
+            condSelect.innerHTML = `<option value="BEE">BEE Condition</option><option value="AHRI">AHRI Condition</option>`;
         } else {
-            document.getElementById('bmg-row').style.display = 'none'; document.getElementById('starter-row-ahri').style.display = '';
+            hpData.forEach(hp => { let opt = document.createElement('option'); opt.value = hp.model; opt.text = hp.model; modelSelect.appendChild(opt); });
+            condSelect.innerHTML = `<option value="UserSpecified">User Specified</option>`;
         }
-
-        document.getElementById('comp-data').innerHTML = `<tr><td>No. of Compressors</td><td>${d.NumCompressors}</td></tr><tr><td>Hertz</td><td>50.0 Hz</td></tr><tr><td>Volts</td><td>415 V</td></tr><tr><td>Refrigerant</td><td>${d.Refrigerant}</td></tr>`;
-        document.getElementById('evap-data').innerHTML = `<tr><td>Flow (m³/h)</td><td>${fmtFlow(d.FlowDesign)}</td></tr><tr><td>Entering Temp (°C)</td><td>12.0</td></tr><tr><td>Leaving Temp (°C)</td><td>7.0</td></tr><tr><td>No. of Passes</td><td>${d.Passes}</td></tr>`;
-        document.getElementById('cond-data').innerHTML = `<tr><td>Ambient Temperature (°C)</td><td>${fmt2(d.AM100)}</td></tr><tr><td>No. of condenser Coils</td><td>${d.NumCoils}</td></tr><tr><td>No. of condenser Fans</td><td>${d.NumFans}</td></tr>`;
-
-        document.getElementById('efficiency-table').innerHTML = `<tr><td class="label-cell"> Capacity (kW)</td><td>${fmt2(d.C100)}</td><td class="label-cell v-sep">75% Load COP</td><td>${fmt3(d.COP75)}</td></tr><tr><td class="label-cell">Power(kW)</td><td>${fmt2(d.P100)}</td><td class="label-cell v-sep">50% Load COP</td><td>${fmt3(d.COP50)}</td></tr><tr><td class="label-cell">COP (kW/kW)</td><td>${fmt3(d.COP100)}</td><td class="label-cell v-sep">25% Load COP</td><td>${fmt3(d.COP25)}</td></tr><tr><td class="label-cell">${con === 'BEE' ? 'ISEER' : 'IPLV'}</td><td>${fmt2(d.ResultVal)}</td><td class="label-cell v-sep">${con === 'BEE' ? 'BEE Star Rating' : ''}</td><td>${con === 'BEE' ? starLabel : ''}</td></tr>`;
-
-        let phtml = `<tr><td>1</td><td>100</td><td>${fmt2(d.C100)}</td><td>${fmt2(d.P100)}</td><td>${fmt3(d.COP100)}</td><td>${fmtDynamic(d.RLA100)}</td><td>${fmtFlow(d.F100)}</td><td>${fmt2(d.EI100)}</td><td>${fmt2(d.EO100)}</td><td>${fmt2(d.PD100)}</td><td>${fmt2(d.AM100)}</td></tr>`;
-        document.getElementById('perf-body').innerHTML = phtml;
-        document.getElementById('elevated-hdr').style.display = (con === 'BEE') ? 'block' : 'none';
-        document.getElementById('elevated-section').style.display = (con === 'BEE') ? 'table' : 'none';
-        document.getElementById('physical-table').innerHTML = `<tr><td style="padding:0; vertical-align:top;"><div style="padding:3px; background:#f2f2f2; text-align:center; font-weight:bold; border-bottom:1px solid var(--border);">OPTION 1</div><table class="inner-table"><tr><td style="width:50%">LxWxH (mm):</td><td>${d.L1}x${d.W1}x${d.H1}</td></tr><tr><td>Shipping Weight:</td><td>${d.SW1} kg</td></tr><tr><td>Operating Weight:</td><td>${d.OW1} kg</td></tr></table></td></tr>`;
-
-    } else {
-        const hp = hpData.find(x => x.model === mod); if(!hp) return;
-        document.getElementById('chiller-sections').style.display = 'none'; document.getElementById('hp-sections').style.display = 'block';
-        document.getElementById('d-app-type').innerText = 'Commercial Heat Pump'; document.getElementById('d-tech').innerText = hp.comp.split(' ')[0] || 'Scroll';
-        document.getElementById('d-model-name').innerText = hp.model; document.getElementById('d-condition').innerText = 'User Specified';
-        document.getElementById('hp-sections').innerHTML = `<table class="hp-table" style="margin-top: -1px;"><tr><th style="border-bottom:1px solid var(--border); width: 33.3%;">Compressor</th><th class="v-sep" style="border-bottom:1px solid var(--border); width: 33.3%;">Evaporator</th><th class="v-sep" style="border-bottom:1px solid var(--border); width: 33.3%;">Condenser</th></tr><tr><td style="padding:0; vertical-align:top;"><table class="inner-table"><tr><td style="width:60%">Type</td><td>${_v(hp.comp)}</td></tr><tr><td>No. of Compressors</td><td>${_v(hp.compQty)}</td></tr></table></td><td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table"><tr><td style="width:60%">Type</td><td>${_v(hp.evap)}</td></tr><tr><td>Fan Quantity</td><td>${_v(hp.fanQty)}</td></tr></table></td><td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table"><tr><td style="width:60%">Type Heat Exch.</td><td>${_v(hp.heatex)}</td></tr><tr><td>Water Flow (m³/h)</td><td>${_v(hp.flow)}</td></tr></table></td></tr></table>`;
     }
-}
-function downloadPDF() {
-    const element = document.getElementById('report-content');
-    const filename = `Kirloskar_Report_${document.getElementById('client').value}_${document.getElementById('project').value}.pdf`.replace(/\s+/g, '_');
-    html2pdf().set({ margin:[5, 5, 5, 5], filename: filename, image: { type: 'jpeg', quality: 1.0 }, html2canvas: { scale: 3, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(element).save();
-}
-</script>
-</body>
-</html>
+    updateDropdowns();
+
+    function goBack() {
+        document.getElementById('report-wrapper').style.display = 'none';
+        document.getElementById('selection-form').style.display = 'block';
+    }
+
+    function generateReport() {
+        const app = document.getElementById('app-select').value;
+        const mod = document.getElementById('model-select').value;
+        const con = document.getElementById('cond-select').value;
+
+        document.getElementById('selection-form').style.display = 'none';
+        document.getElementById('report-wrapper').style.display = 'block';
+        document.getElementById('p-date').innerText = new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
+        document.getElementById('d-client').innerText = document.getElementById('client').value || '—';
+        document.getElementById('d-project').innerText = document.getElementById('project').value || '—';
+        document.getElementById('d-incharge').innerText = document.getElementById('proj-incharge').value || '—';
+
+        let notes = document.getElementById('notes-area');
+
+        if (app === 'Chiller') {
+            const d = chillerDB.find(x => x.Model === mod && x.Condition === con);
+            if(!d) return;
+
+            document.getElementById('chiller-sections').style.display = 'block';
+            document.getElementById('hp-sections').style.display = 'none';
+            
+            document.getElementById('d-app-type').innerText = 'Air Cooled Chiller';
+            document.getElementById('d-tech').innerText = 'Scroll';
+            document.getElementById('d-model-name').innerText = d.ModelName;
+            document.getElementById('d-condition').innerText = con;
+
+            const starLabel = (con === 'BEE') ? (BEE_STAR_LABELS[mod] || '3 Star') : '';
+            if (con === 'BEE') {
+                document.getElementById('d-bmg').innerText = starLabel.includes('2') ? 'BMGA2' : 'BMGA3';
+                document.getElementById('bmg-row').style.display = '';
+                document.getElementById('starter-row-ahri').style.display = 'none';
+            } else {
+                document.getElementById('bmg-row').style.display = 'none';
+                document.getElementById('starter-row-ahri').style.display = '';
+            }
+
+            document.getElementById('comp-data').innerHTML = `<tr><td>No. of Compressors</td><td>${d.NumCompressors}</td></tr><tr><td>Hertz</td><td>50.0 Hz</td></tr><tr><td>Volts</td><td>415 V</td></tr><tr><td>Refrigerant</td><td>${d.Refrigerant}</td></tr>`;
+            document.getElementById('evap-data').innerHTML = `<tr><td>Flow (m³/h)</td><td>${fmtFlow(d.FlowDesign)}</td></tr><tr><td>Entering Temp (°C)</td><td>12.0</td></tr><tr><td>Leaving Temp (°C)</td><td>7.0</td></tr><tr><td>No. of Passes</td><td>${d.Passes}</td></tr>`;
+            document.getElementById('cond-data').innerHTML = `<tr><td>Ambient Temperature (°C)</td><td>${fmt2(d.AM100)}</td></tr><tr><td>No. of condenser Coils</td><td>${d.NumCoils}</td></tr><tr><td>No. of condenser Fans</td><td>${d.NumFans}</td></tr>`;
+
+            document.getElementById('efficiency-table').innerHTML = `
+                <tr><td class="label-cell"> Capacity (kW)</td><td>${fmt2(d.C100)}</td><td class="label-cell v-sep">75% Load COP</td><td>${fmt3(d.COP75)}</td></tr>
+                <tr><td class="label-cell">Power(kW)</td><td>${fmt2(d.P100)}</td><td class="label-cell v-sep">50% Load COP</td><td>${fmt3(d.COP50)}</td></tr>
+                <tr><td class="label-cell">COP (kW/kW)</td><td>${fmt3(d.COP100)}</td><td class="label-cell v-sep">25% Load COP</td><td>${fmt3(d.COP25)}</td></tr>
+                <tr><td class="label-cell">${con === 'BEE' ? 'ISEER' : 'IPLV'}</td><td>${fmt2(d.ResultVal)}</td><td class="label-cell v-sep">${con === 'BEE' ? 'BEE Star Rating' : ''}</td><td>${con === 'BEE' ? starLabel : ''}</td></tr>`;
+
+            let phtml = `<tr><td>1</td><td>100</td><td>${fmt2(d.C100)}</td><td>${fmt2(d.P100)}</td><td>${fmt3(d.COP100)}</td><td>${fmtDynamic(d.RLA100)}</td><td>${fmtFlow(d.F100)}</td><td>${fmt2(d.EI100)}</td><td>${fmt2(d.EO100)}</td><td>${fmt2(d.PD100)}</td><td>${fmt2(d.AM100)}</td></tr>`;
+            document.getElementById('perf-body').innerHTML = phtml;
+
+            const elevDisplay = (con === 'BEE') ? 'table' : 'none';
+            document.getElementById('elevated-hdr').style.display = (con === 'BEE') ? 'block' : 'none';
+            document.getElementById('elevated-section').style.display = elevDisplay;
+
+            document.getElementById('physical-table').innerHTML = `<tr><td style="padding:0; vertical-align:top;"><div style="padding:3px; background:#f2f2f2; text-align:center; font-weight:bold; border-bottom:1px solid var(--border);">OPTION 1</div><table class="inner-table"><tr><td style="width:50%">LxWxH (mm):</td><td>${d.L1}x${d.W1}x${d.H1}</td></tr><tr><td>Shipping Weight:</td><td>${d.SW1} kg</td></tr><tr><td>Operating Weight:</td><td>${d.OW1} kg</td></tr></table></td></tr>`;
+
+        } else {
+            const hp = hpData.find(x => x.model === mod);
+            if(!hp) return;
+
+            document.getElementById('chiller-sections').style.display = 'none';
+            document.getElementById('hp-sections').style.display = 'block';
+
+            document.getElementById('d-app-type').innerText = 'Commercial Heat Pump';
+            document.getElementById('d-tech').innerText = hp.comp.split(' ')[0] || 'Scroll';
+            document.getElementById('d-model-name').innerText = hp.model;
+            document.getElementById('d-condition').innerText = 'User Specified';
+
+            document.getElementById('hp-sections').innerHTML = `
+                <table class="hp-table" style="margin-top: -1px;">
+                    <tr><th style="border-bottom:1px solid var(--border); width: 33.3%;">Compressor</th><th class="v-sep" style="border-bottom:1px solid var(--border); width: 33.3%;">Evaporator</th><th class="v-sep" style="border-bottom:1px solid var(--border); width: 33.3%;">Condenser</th></tr>
+                    <tr>
+                        <td style="padding:0; vertical-align:top;"><table class="inner-table"><tr><td style="width:60%">Type</td><td>${_v(hp.comp)}</td></tr><tr><td>No. of Compressors</td><td>${_v(hp.compQty)}</td></tr></table></td>
+                        <td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table"><tr><td style="width:60%">Type</td><td>${_v(hp.evap)}</td></tr><tr><td>Fan Quantity</td><td>${_v(hp.fanQty)}</td></tr></table></td>
+                        <td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table"><tr><td style="width:60%">Type Heat Exch.</td><td>${_v(hp.heatex)}</td></tr><tr><td>Water Flow (m³/h)</td><td>${_v(hp.flow)}</td></tr></table></td>
+                    </tr>
+                </table>
+            `;
+        }
+    }
+
+    function downloadPDF() {
+        const element = document.getElementById('report-content');
+        const clientStr = document.getElementById('client').value || 'Client';
+        const projStr = document.getElementById('project').value || 'Project';
+        const filename = `Kirloskar_Report_${clientStr}_${projStr}.pdf`.replace(/\s+/g, '_');
+        const opt = { margin:[5, 5, 5, 5], filename: filename, image: { type: 'jpeg', quality: 1.0 }, html2canvas: { scale: 3, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+        html2pdf().set(opt).from(element).save();
+    }
+    </script>
+    </body>
+    </html>
