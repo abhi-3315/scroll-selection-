@@ -3,630 +3,756 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kirloskar Chillers — Selection Tool</title>
+<title>Kirloskar Selection Tool</title>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --navy:#1a2a5e;--navy-dark:#111d42;--navy-light:#243580;
-  --accent:#e8a020;
-  --green:#1a7a3c;--red:#c0392b;
+:root {
+    --navy: #1a2a5e;
+    --border: #000000;
 }
-body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1829;min-height:100vh;color:#111;}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── LOGIN ── */
-#login-screen{
-  min-height:100vh;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;background:#0f1829;
-  position:relative;overflow:hidden;
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f0f2f5;
+    padding: 8px;
+    color: #000;
+    min-height: 100vh;
 }
-#login-screen::before{
-  content:'';position:absolute;inset:0;
-  background:repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(255,255,255,.018) 60px,rgba(255,255,255,.018) 61px),
-    repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(255,255,255,.018) 60px,rgba(255,255,255,.018) 61px);
-  pointer-events:none;
+
+/* --- LOGIN PAGE STYLES --- */
+#login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
 }
-.login-brand{text-align:center;margin-bottom:36px;position:relative;}
-.login-brand .logo-ring{
-  width:72px;height:72px;border-radius:50%;background:#1a2a5e;border:2px solid #e8a020;
-  display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+.login-box {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    width: 350px;
+    text-align: center;
+    border-top: 5px solid var(--navy);
 }
-.login-brand .logo-ring svg{width:38px;height:38px;}
-.login-brand h1{color:#fff;font-size:20px;font-weight:700;letter-spacing:.5px;}
-.login-brand p{color:#8899bb;font-size:12px;margin-top:4px;letter-spacing:.3px;}
-
-.login-card{
-  background:#fff;border-radius:16px;padding:40px 40px 36px;
-  width:420px;max-width:94vw;border-top:3px solid var(--accent);
+.login-box h2 {
+    color: var(--navy);
+    margin-bottom: 20px;
+    font-size: 22px;
 }
-.login-card h2{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:6px;}
-.login-card .subtitle{font-size:12px;color:#667;margin-bottom:28px;}
-.field{margin-bottom:18px;}
-.field label{display:block;font-size:11px;font-weight:700;color:#445;letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px;}
-.field-wrap{position:relative;}
-.field-wrap .icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;opacity:.4;}
-.field input{
-  width:100%;padding:11px 14px 11px 40px;border:1.5px solid #dde;border-radius:8px;
-  font-size:14px;color:#111;background:#fafafa;transition:border-color .2s;outline:none;
+.login-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
 }
-.field input:focus{border-color:var(--navy);background:#fff;}
-.field input::placeholder{color:#aab;}
-.login-btn{
-  width:100%;padding:13px;margin-top:4px;background:var(--navy);color:#fff;
-  border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;
-  letter-spacing:.3px;transition:background .18s;
+.login-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--navy);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    transition: background 0.3s;
 }
-.login-btn:hover{background:var(--navy-light);}
-
-/* info box */
-.info-box{
-  background:#e8f0fe;border:1px solid #b3c6f7;border-radius:8px;
-  padding:10px 14px;font-size:12px;color:#1a2a5e;margin-top:16px;line-height:1.6;
+.login-btn:hover { background: #121d42; }
+.error-msg {
+    color: red;
+    font-size: 13px;
+    margin-bottom: 15px;
+    display: none;
+    font-weight: bold;
 }
-.info-box strong{display:block;margin-bottom:2px;}
+.request-access {
+    margin-top: 15px;
+    font-size: 12px;
+    color: var(--navy);
+    cursor: pointer;
+    text-decoration: underline;
+}
 
-.toast{padding:11px 16px;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:16px;display:none;}
-.toast.err{background:#fdecea;color:#8b1a1a;border:1px solid #f5c6c6;}
-.toast.warn{background:#fef8e6;color:#7a5200;border:1px solid #ffd966;}
-.toast.ok{background:#e6f9ee;color:#1a5c32;border:1px solid #9fddb8;}
+/* --- MAIN APP STYLES --- */
+#main-app { display: none; } /* Hidden until logged in */
 
-/* ── ADMIN ── */
-#admin-screen{display:none;background:#f0f3f8;min-height:100vh;}
-.admin-topbar{background:var(--navy);color:#fff;padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;}
-.admin-topbar .brand-name{font-size:15px;font-weight:700;}
-.admin-topbar .brand-sub{font-size:11px;opacity:.6;margin-top:1px;}
-.topbar-right{display:flex;align-items:center;gap:10px;}
-.tb-btn{padding:7px 16px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;border:none;}
-.tb-open{background:var(--accent);color:#111;}.tb-open:hover{background:#d4920e;}
-.tb-logout{background:rgba(255,255,255,.12);color:#fff;}.tb-logout:hover{background:rgba(255,255,255,.22);}
-.admin-body{max-width:960px;margin:28px auto;padding:0 20px 40px;}
-.admin-body h2{font-size:22px;font-weight:700;color:var(--navy);margin-bottom:4px;}
-.admin-body .pg{font-size:13px;color:#667;margin-bottom:24px;}
-.acard{background:#fff;border-radius:12px;border:1px solid #e0e4ed;margin-bottom:20px;overflow:hidden;}
-.acard-head{padding:16px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eef0f5;}
-.acard-head h3{font-size:14px;font-weight:700;color:var(--navy);}
-.badge-count{background:#e8a020;color:#111;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;min-width:24px;text-align:center;}
-.utbl{width:100%;border-collapse:collapse;font-size:13px;}
-.utbl th{background:#f5f7fb;color:#556;font-size:11px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;padding:10px 16px;text-align:left;border-bottom:1px solid #e8eaf2;}
-.utbl td{padding:11px 16px;border-bottom:1px solid #f0f2f8;color:#222;vertical-align:middle;}
-.utbl tr:last-child td{border-bottom:none;}
-.utbl tr:hover td{background:#fafbff;}
-.sb{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block;}
-.sb-pend{background:#fff4dc;color:#7a5200;}.sb-ok{background:#e4f5ec;color:#1a5c32;}.sb-rej{background:#fdecea;color:#8b1a1a;}
-.ab{padding:5px 13px;border-radius:6px;border:none;font-size:11px;font-weight:700;cursor:pointer;margin:2px;}
-.ab-ok{background:#e4f5ec;color:#1a5c32;}.ab-ok:hover{background:#c4ecd6;}
-.ab-rej{background:#fdecea;color:#8b1a1a;}.ab-rej:hover{background:#f9d0cf;}
-.ab-del{background:#f0f2f8;color:#556;}.ab-del:hover{background:#e0e4ed;}
-.empty-row td{text-align:center;color:#aab;padding:24px;font-size:13px;}
+.selection-box {
+    background: #fff; max-width: 800px; margin: 0 auto 20px;
+    padding: 20px; border-radius: 8px; border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.input-group label { display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; }
+input:not(.login-input), select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; }
+.gen-btn { 
+    width: 100%; padding: 12px; background: var(--navy); color: white; 
+    border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px;
+}
 
-/* ── APP ── */
-#app-screen{display:none;background:#fff;min-height:100vh;}
-.app-topbar{background:var(--navy);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;}
-.app-topbar .abrand{font-size:14px;font-weight:700;color:#fff;}
-.aright{display:flex;align-items:center;gap:8px;}
-.user-pill{background:rgba(255,255,255,.12);color:#fff;padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;}
-.at-btn{padding:5px 14px;border-radius:7px;border:none;cursor:pointer;font-size:12px;font-weight:700;}
-.at-admin{background:var(--accent);color:#111;}
-.at-logout{background:rgba(255,255,255,.15);color:#fff;}.at-logout:hover{background:rgba(255,255,255,.25);}
-.app-inner{padding:12px;}
-.sel-wrap{background:#f7f8fb;max-width:820px;margin:0 auto 20px;padding:22px;border-radius:10px;border:1px solid #dde;}
-.sel-title{text-align:center;color:var(--navy);font-size:18px;font-weight:700;margin-bottom:18px;}
-.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
-.sg label{display:block;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px;color:#445;}
-.sg input,.sg select{width:100%;padding:9px 10px;border:1.5px solid #ccd;border-radius:7px;font-weight:600;font-size:13px;color:#111;background:#fff;}
-.sg input:focus,.sg select:focus{border-color:var(--navy);outline:none;}
-.gen-btn{width:100%;padding:13px;background:var(--navy);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:14px;}
-.gen-btn:hover{background:var(--navy-light);}
+.report-wrapper { max-width: 900px; margin: 0 auto; display: none; background: #fff; }
+.report-container { background: #fff; padding: 6px 10px; border: none; width: 200mm; max-width: 100%; margin: 0 auto; }
 
-/* ── REPORT ── */
-.rpt-wrapper{max-width:900px;margin:0 auto;display:none;}
-.btn-bar{display:flex;justify-content:center;gap:14px;margin-bottom:10px;}
-.rpt-btn{padding:8px 22px;border:none;border-radius:7px;cursor:pointer;font-weight:700;font-size:13px;}
-.rpt-back{background:#6c757d;color:#fff;}.rpt-pdf{background:#1a7a3c;color:#fff;}
-.report-container{background:#fff;padding:6px 10px;width:200mm;max-width:100%;margin:0 auto;}
-.header-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px;}
-.comp-name{font-weight:bold;font-size:14px;}
-.logo-img{height:40px;width:auto;object-fit:contain;}
-.version-info{font-size:10px;font-weight:bold;margin-bottom:3px;}
-table{width:100%;border-collapse:collapse;table-layout:fixed;border:1px solid #000;margin-bottom:0;}
-th,td{border:none;padding:3px 5px;font-size:9.5px;font-weight:bold;vertical-align:middle;line-height:1.2;}
-.report-container>table tr,#efficiency-table tr,#physical-table tr,.hp-table tr{min-height:22px;height:22px;}
-.section-header{background:var(--navy)!important;color:#fff!important;text-align:center;font-weight:bold;padding:4px 2px;font-size:9.5px;text-transform:uppercase;border:1px solid #000;border-bottom:none;margin-top:-1px;letter-spacing:.3px;}
-.first-header{margin-top:10px!important;}
-.label-cell{background:#fff;width:22%;}
-.bordered-table th,.bordered-table td{border:1px solid #000!important;text-align:center;height:22px;}
-.inner-table{width:100%;border:none!important;table-layout:auto;margin-bottom:0;}
-.inner-table td{border:none!important;padding:2px 8px 2px 5px;min-height:22px;height:22px;}
-.inner-table td:last-child{text-align:right;padding-right:10px;}
-.inner-table td:first-child{text-align:left;padding-left:5px;}
-#efficiency-table .inner-table td{text-align:left;}
-#efficiency-table .inner-table td:last-child{text-align:right;padding-right:12px;}
-.v-sep{border-left:1px solid #000!important;}
-.perf-table th,.perf-table td{font-size:8.5px;padding:2px 1px;height:21px;}
-#notes-area{border:1px solid #000;padding:10px 12px;font-size:10.5px;font-weight:bold;min-height:60px;line-height:1.5;background:#fefefa;}
+.header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; }
+.comp-name { font-weight: bold; font-size: 14px; }
+.logo-img { height: 40px; width: auto; object-fit: contain; }
+.version-info { font-size: 10px; font-weight: bold; margin-bottom: 3px; }
 
-@media print{
-  body{background:#fff;padding:0;margin:0;}
-  #app-screen .app-topbar,.btn-bar,.sel-wrap{display:none!important;}
-  .rpt-wrapper{display:block!important;}
-  .report-container{border:none;padding:3mm 4mm;width:100%;margin:0;}
-  @page{size:A4;margin:4mm 5mm;}
-  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid var(--border); margin-bottom: 0; }
+th, td { border: none; padding: 3px 5px; font-size: 9.5px; font-weight: bold; vertical-align: middle; line-height: 1.2; }
+
+.report-container > table tr, #efficiency-table tr, #physical-table tr, .hp-table tr { min-height: 22px; height: 22px; }
+
+.section-header {
+    background: var(--navy) !important; color: white !important;
+    text-align: center; font-weight: bold; padding: 4px 2px;
+    font-size: 9.5px; text-transform: uppercase; 
+    border: 1px solid var(--border); border-bottom: none; 
+    margin-top: -1px; margin-bottom: 0; letter-spacing: 0.3px;
+}
+.first-header { margin-top: 10px !important; }
+
+.label-cell { background: #ffffff; width: 22%; }
+.bordered-table th, .bordered-table td { border: 1px solid var(--border) !important; text-align: center; height: 22px; }
+
+.inner-table { width: 100%; border: none !important; table-layout: auto; margin-bottom: 0; }
+.inner-table td { border: none !important; padding: 2px 8px 2px 5px; min-height: 22px; height: 22px; }
+.inner-table td:last-child { text-align: right; padding-right: 10px; }
+.inner-table td:first-child { text-align: left; padding-left: 5px; }
+
+.wrap-text { white-space: normal; line-height: 1.1; }
+
+#efficiency-table .inner-table td { text-align: left; }
+#efficiency-table .inner-table td:last-child { text-align: right; padding-right: 12px; }
+.v-sep { border-left: 1px solid var(--border) !important; }
+
+/* Buttons Style */
+.btn-bar { display: flex; justify-content: center; gap: 15px; margin-bottom: 8px; }
+.print-btn { background: #28a745; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; }
+.back-btn { background: #6c757d; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; }
+.pnid-btn { background: #007bff; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; }
+.admin-btn { background: #dc3545; color: white; padding: 8px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; }
+
+.perf-table th, .perf-table td { font-size: 8.5px; padding: 2px 1px; height: 21px; }
+
+#notes-area {
+    border: 1px solid var(--border); padding: 10px 12px; font-size: 10.5px; 
+    font-weight: bold; min-height: 60px; line-height: 1.5; background: #fefefa; margin-top: 0; 
+}
+
+/* --- MODAL STYLES --- */
+.modal {
+    display: none; position: fixed; z-index: 1000; left: 0; top: 0;
+    width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); overflow: auto;
+}
+.modal-content {
+    background-color: #fff; margin: 5% auto; padding: 20px; border-radius: 8px;
+    width: 80%; max-width: 900px; position: relative; text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+.admin-modal-content { max-width: 500px; }
+.close-btn {
+    position: absolute; top: 10px; right: 20px; color: #333;
+    font-size: 28px; font-weight: bold; cursor: pointer;
+}
+.close-btn:hover { color: red; }
+.modal-header { font-size: 18px; color: var(--navy); margin-bottom: 15px; font-weight: bold; text-transform: uppercase; }
+
+/* Admin Dashboard Table */
+.admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 15px; }
+.admin-table th, .admin-table td { border: 1px solid #ddd; padding: 8px; font-size: 12px; }
+.admin-table th { background-color: var(--navy); color: white; }
+.delete-btn { background: red; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; }
+
+@media print {
+    body { background: white; padding: 0; margin: 0; }
+    .btn-bar, .selection-box, #login-wrapper, .modal { display: none !important; }
+    .report-wrapper { display: block !important; }
+    .report-container { border: none; padding: 3mm 4mm; width: 100%; margin: 0; }
+    @page { size: A4; margin: 4mm 5mm; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
 </style>
 </head>
 <body>
 
-<!-- ═══════ LOGIN ═══════ -->
-<div id="login-screen">
-  <div class="login-brand">
-    <div class="logo-ring">
-      <svg viewBox="0 0 38 38" fill="none"><circle cx="19" cy="19" r="17" stroke="#e8a020" stroke-width="2"/><path d="M11 19h16M19 11v16" stroke="#e8a020" stroke-width="2.2" stroke-linecap="round"/><circle cx="19" cy="19" r="4" fill="#e8a020"/></svg>
+<!-- LOGIN WRAPPER -->
+<div id="login-wrapper">
+    <div class="login-box">
+        <img src="chillers_logo.png" alt="Kirloskar Logo" style="max-height: 60px; margin-bottom: 15px;" onerror="this.style.display='none'">
+        <h2>KCST SCROLL SOFTWARE </h2>
+        <div class="error-msg" id="login-error">Invalid Username or Password</div>
+        <input type="text" id="username" class="login-input" placeholder="Username" onkeypress="handleEnter(event)">
+        <input type="password" id="password" class="login-input" placeholder="Password" onkeypress="handleEnter(event)">
+        <button class="login-btn" onclick="attemptLogin()">LOGIN</button>
+        <div class="request-access" onclick="requestAccess()">Request Access from Admin</div>
     </div>
-    <h1>KIRLOSKAR CHILLERS</h1>
-    <p>A Kirloskar Group Company &nbsp;·&nbsp; Selection Tool v1.1</p>
-  </div>
-  <div class="login-card">
-    <h2>Welcome back</h2>
-    <p class="subtitle">Sign in or enter details to request access</p>
-    <div class="toast" id="l-toast"></div>
-    <div class="field">
-      <label>Email / Username</label>
-      <div class="field-wrap">
-        <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 1c-2.67 0-8 1.34-8 4v1h16v-1c0-2.66-5.33-4-8-4z"/></svg>
-        <input type="text" id="l-user" placeholder="Enter your email or username" autocomplete="username">
-      </div>
-    </div>
-    <div class="field">
-      <label>Password</label>
-      <div class="field-wrap">
-        <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><path d="M11 1a4 4 0 0 0-4 4v1H3a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H8V5a3 3 0 0 1 6 0v1h1V5a4 4 0 0 0-4-4z"/></svg>
-        <input type="password" id="l-pass" placeholder="Enter your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
-      </div>
-    </div>
-    <button class="login-btn" onclick="doLogin()">Sign In / Request Access</button>
-  </div>
 </div>
 
-<!-- ═══════ ADMIN PANEL ═══════ -->
-<div id="admin-screen">
-  <div class="admin-topbar">
-    <div>
-      <div class="brand-name">Kirloskar Chillers — Admin Panel</div>
-      <div class="brand-sub">User Access Management</div>
+<!-- MAIN APPLICATION -->
+<div id="main-app">
+    <div class="selection-box" id="selection-form">
+        <div style="text-align:center; color:var(--navy); margin-bottom:15px;">
+            <h2>Kirloskar Selection Tool</h2>
+            <!-- Admin button only shows for Abhijit -->
+            <button class="admin-btn" id="btn-admin" onclick="openAdminModal()" style="display:none; margin: 10px auto;">⚙️ MASTER ADMIN PANEL</button>
+        </div>
+        <div class="grid">
+            <div class="input-group"><label>Client Name</label><input type="text" id="client" value="KCPL"></div>
+            <div class="input-group"><label>Project Name</label><input type="text" id="project" value=""></div>
+            <div class="input-group"><label>Project Incharge</label><input type="text" id="proj-incharge" value=""></div>
+            
+            <div class="input-group"><label>Application</label>
+                <select id="app-select" onchange="updateDropdowns()">
+                    <option value="Chiller">Chiller</option>
+                    <option value="HeatPump">Heat Pump</option>
+                </select>
+            </div>
+            
+            <div class="input-group"><label>Model</label>
+                <select id="model-select"></select>
+            </div>
+            
+            <div class="input-group"><label>Condition</label>
+                <select id="cond-select"></select>
+            </div>
+        </div>
+        <button class="gen-btn" onclick="generateReport()">VIEW OFFICIAL REPORT</button>
     </div>
-    <div class="topbar-right">
-      <span id="adm-user" style="color:#8899bb;font-size:12px;"></span>
-      <button class="tb-btn tb-open" onclick="goToApp()">Open Selection Tool</button>
-      <button class="tb-btn tb-logout" onclick="doLogout()">Logout</button>
+
+    <div class="report-wrapper" id="report-wrapper">
+        <div class="btn-bar">
+            <button class="back-btn" onclick="goBack()">← BACK TO EDIT</button>
+            <button class="pnid-btn" id="btn-pnid" onclick="openPnIdModal()" style="display:none;">⚙️ VIEW P&ID</button>
+            <button class="print-btn" onclick="downloadPDF()">⬇ DOWNLOAD PDF</button>
+        </div>
+
+        <div class="report-container" id="report-content">
+            <div class="header-top">
+                <div>
+                    <div class="comp-name">KIRLOSKAR CHILLERS PRIVATE LIMITED</div>
+                    <div style="font-size:10px;">A Kirloskar Group Company</div>
+                </div>
+                <img src="chillers_logo.png" alt="Kirloskar Logo" class="logo-img" onerror="this.style.display='none'">
+            </div>
+
+            <div class="version-info">
+                Version : 1.1.0 | Release Date: 2026/03/31
+                <div style="float:right">Print Date: <span id="p-date"></span></div>
+            </div>
+
+            <div class="section-header first-header">PROJECT DETAILS</div>
+            <table>
+                <colgroup><col style="width:22%"><col style="width:22%"><col style="width:22%"><col style="width:28%"></colgroup>
+                <tr>
+                    <td class="label-cell">Client</td><td class="v-sep" id="d-client"></td>
+                    <td class="label-cell v-sep">Appliance/Type</td><td class="v-sep" id="d-app-type"></td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Project Name</td><td class="v-sep" id="d-project"></td>
+                    <td class="label-cell v-sep">Cooling/Heating Tech</td><td class="v-sep" id="d-tech"></td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Project Incharge</td><td class="v-sep" id="d-incharge"></td>
+                    <td class="label-cell v-sep">Brand</td><td class="v-sep">Kirloskar Chillers</td>
+                </tr>
+                <tr>
+                    <td class="label-cell">Model</td><td class="v-sep" id="d-model-name"></td>
+                    <td class="label-cell v-sep">Conditions</td><td class="v-sep" id="d-condition"></td>
+                </tr>
+                <tr id="bmg-row">
+                    <td class="label-cell">BMG</td><td class="v-sep" id="d-bmg"></td>
+                    <td class="label-cell v-sep">Starter Type</td><td class="v-sep">Star Delta</td>
+                </tr>
+                <tr id="starter-row-ahri" style="display:none;">
+                    <td class="label-cell">Starter Type</td><td class="v-sep">Star Delta</td>
+                    <td class="label-cell v-sep"></td><td class="v-sep"></td>
+                </tr>
+            </table>
+
+            <div id="chiller-sections">
+                <div class="section-header" id="d-rating-hdr">RATED PERFORMANCE AT STANDARD RATING CONDITIONS AS PER TABLE 1, IS 16590 : 2023</div>
+                <table>
+                    <tr>
+                        <th style="border-bottom:1px solid var(--border);">Compressor</th>
+                        <th class="v-sep" style="border-bottom:1px solid var(--border);">Evaporator</th>
+                        <th class="v-sep" style="border-bottom:1px solid var(--border);">Air Cooled Condenser</th>
+                    </tr>
+                    <tr>
+                        <td style="padding:0; vertical-align:top;"><table class="inner-table" id="comp-data"></table></td>
+                        <td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table" id="evap-data"></table></td>
+                        <td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table" id="cond-data"></table></td>
+                    </tr>
+                </table>
+
+                <div class="section-header" id="d-eff-hdr">INDIAN SEASONAL ENERGY EFFICIENCY RATIO (ISEER) AS PER ANNEX C, IS 16590 : 2023</div>
+                <table id="efficiency-table"></table>
+
+                <div class="section-header" id="d-perf-hdr">PERFORMANCE DETAILS</div>
+                <table class="perf-table bordered-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">load pts</th><th rowspan="2">% Load</th><th rowspan="2">Capacity<br>(kW)</th>
+                            <th rowspan="2">Power<br>(kW)</th><th rowspan="2">COP<br>(kW/kW)</th><th rowspan="2">RLA<br>(A)</th>
+                            <th colspan="4">Evaporator</th><th colspan="1">Air Cooled Condenser</th>
+                        </tr>
+                        <tr>
+                            <th>Flow<br>(m³/h)</th><th>T in<br>(°C)</th><th>T out<br>(°C)</th><th>Pd<br>(kPa)</th><th>Ambient Temperature<br>(°C)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="perf-body"></tbody>
+                </table>
+
+                <div class="section-header" id="elevated-hdr">PERFORMANCE DETAILS AT ELEVATED TEMPERATURE</div>
+                <table class="perf-table bordered-table" id="elevated-section">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">load pts</th><th rowspan="2">% Load</th><th rowspan="2">Capacity<br>(kW)</th>
+                            <th rowspan="2">Power<br>(kW)</th><th rowspan="2">COP<br>(kW/kW)</th><th rowspan="2">RLA<br>(A)</th>
+                            <th colspan="4">Evaporator</th><th colspan="1">Air Cooled Condenser</th>
+                        </tr>
+                        <tr>
+                            <th>Flow<br>(m³/h)</th><th>T in<br>(°C)</th><th>T out<br>(°C)</th><th>Pd<br>(kPa)</th><th>Ambient Temperature<br>(°C)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="elevated-perf-body"></tbody>
+                </table>
+
+                <div class="section-header">MOTOR AND PHYSICAL DATA</div>
+                <table id="physical-table"></table>
+            </div>
+
+            <div id="hp-sections" style="display:none;"></div>
+            
+            <div class="section-header">NOTES</div>
+            <div id="notes-area"></div>
+        </div>
     </div>
-  </div>
-  <div class="admin-body">
-    <h2>User Management</h2>
-    <p class="pg">Manage user access requests below.</p>
-    <div class="acard">
-      <div class="acard-head">
-        <h3>Pending Requests</h3>
-        <span class="badge-count" id="pend-count">0</span>
-      </div>
-      <table class="utbl">
-        <thead><tr><th>Name</th><th>Email</th><th>Username</th><th>Requested</th><th>Actions</th></tr></thead>
-        <tbody id="pend-body"></tbody>
-      </table>
+</div> 
+
+<!-- P&ID MODAL SECTION -->
+<div id="pnid-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closePnIdModal()">&times;</span>
+        <div class="modal-header">Piping and Instrumentation Diagram (P&ID)</div>
+        <img id="pnid-image" src="pnid_diagram.png" alt="P&ID Diagram" style="width: 100%; max-height: 65vh; object-fit: contain; border: 1px solid #ddd; margin-bottom: 15px;" onerror="this.onerror=null; this.src='https://via.placeholder.com/800x400.png?text=P%26ID+Diagram+Not+Found';">
+        <div><button class="pnid-btn" onclick="downloadPnIdImage()">⬇ DOWNLOAD P&ID IMAGE</button></div>
     </div>
-    <div class="acard">
-      <div class="acard-head"><h3>All Users</h3></div>
-      <table class="utbl">
-        <thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead>
-        <tbody id="all-body"></tbody>
-      </table>
-    </div>
-  </div>
 </div>
 
-<!-- ═══════ MAIN APP ═══════ -->
-<div id="app-screen">
-  <div class="app-topbar">
-    <div class="abrand">Kirloskar Chillers — Selection Tool</div>
-    <div class="aright">
-      <span class="user-pill" id="app-uname"></span>
-      <button id="adm-btn" class="at-btn at-admin" style="display:none;" onclick="showAdminPanel()">Admin Panel</button>
-      <button class="at-btn at-logout" onclick="doLogout()">Logout</button>
-    </div>
-  </div>
-  <div class="app-inner">
-    <div class="sel-wrap" id="sel-form">
-      <div class="sel-title">Equipment Selection</div>
-      <div class="sgrid">
-        <div class="sg"><label>Client Name</label><input type="text" id="client" value="KCPL"></div>
-        <div class="sg"><label>Project Name</label><input type="text" id="project"></div>
-        <div class="sg"><label>Project Incharge</label><input type="text" id="proj-incharge"></div>
-        <div class="sg"><label>Application</label>
-          <select id="app-select" onchange="updateDropdowns()">
-            <option value="Chiller">Chiller</option>
-            <option value="HeatPump">Heat Pump</option>
-          </select>
+<!-- ADMIN MODAL SECTION -->
+<div id="admin-modal" class="modal">
+    <div class="modal-content admin-modal-content">
+        <span class="close-btn" onclick="closeAdminModal()">&times;</span>
+        <div class="modal-header">Master Admin Panel</div>
+        <p style="font-size: 13px; margin-bottom: 15px;">Add or Remove users who can access this tool.</p>
+        
+        <div style="display: flex; gap: 5px; justify-content: center; margin-bottom: 15px;">
+            <input type="text" id="new-user-email" placeholder="New User Email" class="login-input" style="margin-bottom:0;">
+            <input type="text" id="new-user-pass" placeholder="Password" class="login-input" style="margin-bottom:0;">
+            <button class="print-btn" onclick="addNewUser()">ADD</button>
         </div>
-        <div class="sg"><label>Model</label><select id="model-select"></select></div>
-        <div class="sg"><label>Condition</label><select id="cond-select"></select></div>
-      </div>
-      <button class="gen-btn" onclick="generateReport()">Generate Official Report</button>
-    </div>
-    <div class="rpt-wrapper" id="rpt-wrapper">
-      <div class="btn-bar">
-        <button class="rpt-btn rpt-back" onclick="goBack()">&#8592; Back to Selection</button>
-        <button class="rpt-btn rpt-pdf" onclick="downloadPDF()">&#8595; Download PDF</button>
-      </div>
-      <div class="report-container" id="report-content">
-        <div class="header-top">
-          <div>
-            <div class="comp-name">KIRLOSKAR CHILLERS PRIVATE LIMITED</div>
-            <div style="font-size:10px;">A Kirloskar Group Company</div>
-          </div>
-          <img src="chillers_logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
-        </div>
-        <div class="version-info">Version : 1.1.0 | Release Date: 2026/03/31<div style="float:right">Print Date: <span id="p-date"></span></div></div>
-        <div class="section-header first-header">PROJECT DETAILS</div>
-        <table>
-          <colgroup><col style="width:22%"><col style="width:28%"><col style="width:22%"><col style="width:28%"></colgroup>
-          <tr><td class="label-cell">Client</td><td class="v-sep" id="d-client"></td><td class="label-cell v-sep">Appliance/Type</td><td class="v-sep" id="d-app-type"></td></tr>
-          <tr><td class="label-cell">Project Name</td><td class="v-sep" id="d-project"></td><td class="label-cell v-sep">Cooling/Heating Tech</td><td class="v-sep" id="d-tech"></td></tr>
-          <tr><td class="label-cell">Project Incharge</td><td class="v-sep" id="d-incharge"></td><td class="label-cell v-sep">Brand</td><td class="v-sep">Kirloskar Chillers</td></tr>
-          <tr><td class="label-cell">Model</td><td class="v-sep" id="d-model-name"></td><td class="label-cell v-sep">Condition</td><td class="v-sep" id="d-condition"></td></tr>
-          <tr id="bmg-row"><td class="label-cell">BMG</td><td class="v-sep" id="d-bmg"></td><td class="label-cell v-sep">Starter Type</td><td class="v-sep">Star Delta</td></tr>
-          <tr id="starter-row-ahri" style="display:none;"><td class="label-cell">Starter Type</td><td class="v-sep">Star Delta</td><td class="label-cell v-sep"></td><td class="v-sep"></td></tr>
+
+        <table class="admin-table">
+            <thead>
+                <tr><th>Email</th><th>Password</th><th>Action</th></tr>
+            </thead>
+            <tbody id="admin-user-list">
+                <!-- Populated by JS -->
+            </tbody>
         </table>
-        <div id="chiller-sections">
-          <div class="section-header" id="d-rating-hdr">RATED PERFORMANCE AT STANDARD RATING CONDITIONS AS PER TABLE 1, IS 16590 : 2023</div>
-          <table>
-            <tr>
-              <th style="border-bottom:1px solid #000;">Compressor</th>
-              <th class="v-sep" style="border-bottom:1px solid #000;">Evaporator</th>
-              <th class="v-sep" style="border-bottom:1px solid #000;">Air Cooled Condenser</th>
-            </tr>
-            <tr>
-              <td style="padding:0;vertical-align:top;"><table class="inner-table" id="comp-data"></table></td>
-              <td class="v-sep" style="padding:0;vertical-align:top;"><table class="inner-table" id="evap-data"></table></td>
-              <td class="v-sep" style="padding:0;vertical-align:top;"><table class="inner-table" id="cond-data"></table></td>
-            </tr>
-          </table>
-          <div class="section-header" id="d-eff-hdr">INDIAN SEASONAL ENERGY EFFICIENCY RATIO (ISEER) AS PER ANNEX C, IS 16590 : 2023</div>
-          <table id="efficiency-table"></table>
-          <div class="section-header" id="d-perf-hdr">PERFORMANCE DETAILS</div>
-          <table class="perf-table bordered-table">
-            <thead>
-              <tr>
-                <th rowspan="2">load pts</th><th rowspan="2">% Load</th><th rowspan="2">Capacity<br>(kW)</th>
-                <th rowspan="2">Power<br>(kW)</th><th rowspan="2">COP<br>(kW/kW)</th><th rowspan="2">RLA<br>(A)</th>
-                <th colspan="4">Evaporator</th><th colspan="1">Air Cooled Condenser</th>
-              </tr>
-              <tr>
-                <th>Flow<br>(m³/h)</th><th>T in<br>(°C)</th><th>T out<br>(°C)</th><th>Pd<br>(kPa)</th><th>Ambient Temp<br>(°C)</th>
-              </tr>
-            </thead>
-            <tbody id="perf-body"></tbody>
-          </table>
-          <div class="section-header" id="elevated-hdr">PERFORMANCE DETAILS AT ELEVATED TEMPERATURE</div>
-          <table class="perf-table bordered-table" id="elevated-section">
-            <thead>
-              <tr>
-                <th rowspan="2">load pts</th><th rowspan="2">% Load</th><th rowspan="2">Capacity<br>(kW)</th>
-                <th rowspan="2">Power<br>(kW)</th><th rowspan="2">COP<br>(kW/kW)</th><th rowspan="2">RLA<br>(A)</th>
-                <th colspan="4">Evaporator</th><th colspan="1">Air Cooled Condenser</th>
-              </tr>
-              <tr>
-                <th>Flow<br>(m³/h)</th><th>T in<br>(°C)</th><th>T out<br>(°C)</th><th>Pd<br>(kPa)</th><th>Ambient Temp<br>(°C)</th>
-              </tr>
-            </thead>
-            <tbody id="elevated-perf-body"></tbody>
-          </table>
-          <div class="section-header">MOTOR AND PHYSICAL DATA</div>
-          <table id="physical-table"></table>
-        </div>
-        <div id="hp-sections" style="display:none;"></div>
-        <div class="section-header">NOTES</div>
-        <div id="notes-area"></div>
-      </div>
     </div>
-  </div>
 </div>
 
 <script>
-/* ═══════════ USER STORE ═══════════ */
-function getUsers(){try{return JSON.parse(localStorage.getItem('kirl_users')||'[]');}catch{return[];}}
-function saveUsers(u){localStorage.setItem('kirl_users',JSON.stringify(u));}
-function getSession(){try{return JSON.parse(sessionStorage.getItem('kirl_sess'));}catch{return null;}}
-function setSession(u){sessionStorage.setItem('kirl_sess',JSON.stringify(u));}
-function clearSession(){sessionStorage.removeItem('kirl_sess');}
+// --- ADMIN USER MANAGEMENT LOGIC ---
+const MASTER_ADMIN = 'abhijit.chavhan@kirloskar.com';
 
-// This creates the Admin automatically the first time the page loads
-(function seed(){
-  const u=getUsers();
-  if(!u.find(x=>x.username==='admin')){
-    u.push({id:'admin',name:'Administrator',username:'admin',email:'admin@kirloskar.com',
-      password:'Admin@1234',role:'admin',status:'approved',createdAt:new Date().toISOString()});
-    saveUsers(u);
-  }
-})();
-
-/* ═══════════ TOAST ═══════════ */
-function toast(id,type,msg){
-  const el=document.getElementById(id);
-  el.className='toast '+type;el.textContent=msg;el.style.display='block';
-}
-function hideToast(id){const el=document.getElementById(id);if(el)el.style.display='none';}
-
-/* ═══════════ ROUTING ═══════════ */
-function show(id){
-  ['login-screen','admin-screen','app-screen'].forEach(s=>{
-    document.getElementById(s).style.display='none';
-  });
-  const el=document.getElementById(id);
-  el.style.display='block';
-}
-
-/* ═══════════ LOGIN / AUTO REQUEST ═══════════ */
-function doLogin(){
-  hideToast('l-toast');
-  const user=document.getElementById('l-user').value.trim();
-  const pass=document.getElementById('l-pass').value;
-  
-  if(!user || !pass) { 
-    toast('l-toast','err','Please enter email/username and password.'); 
-    return; 
-  }
-  if(pass.length < 6) { 
-    toast('l-toast','err','Password must be at least 6 characters.'); 
-    return; 
-  }
-
-  const users = getUsers();
-  const found = users.find(u => u.username === user || u.email === user);
-
-  if (found) {
-    // Check credentials for existing user
-    if(found.password !== pass) {
-      toast('l-toast','err','Invalid password.');
-      return;
-    }
-    if(found.status === 'pending') {
-      toast('l-toast','warn','Your request is pending admin approval. Please wait.');
-      return;
-    }
-    if(found.status === 'rejected') {
-      toast('l-toast','err','Access denied. Contact administrator.');
-      return;
-    }
-    
-    // Success login
-    setSession(found);
-    if(found.role === 'admin'){ showAdminPanel(); }
-    else{ showApp(); }
-    
-  } else {
-    // User does not exist - Automatically register and set as pending
-    const isEmail = user.includes('@');
-    const newUser = {
-      id: 'u_' + Date.now(),
-      name: isEmail ? user.split('@')[0] : user,
-      username: user,
-      email: isEmail ? user : user + '@unknown.com', // Fallback if they didn't put @
-      password: pass,
-      role: 'user',
-      status: 'pending',
-      createdAt: new Date().toISOString()
+// Load users from browser storage, or set defaults if empty
+let allowedUsers = JSON.parse(localStorage.getItem('kirloskarUsers'));
+if (!allowedUsers) {
+    allowedUsers = {
+        'abhijit.chavhan@kirloskar.com': 'kirloskar@'
     };
-    users.push(newUser);
-    saveUsers(users);
+    localStorage.setItem('kirloskarUsers', JSON.stringify(allowedUsers));
+}
+
+function saveUsers() {
+    localStorage.setItem('kirloskarUsers', JSON.stringify(allowedUsers));
+    renderAdminTable();
+}
+
+function requestAccess() {
+    alert("To request access, please send an email to the Master Admin:\n\nabhijit.chavhan@kirloskar.com\n\nInclude your desired Email and Password.");
+}
+
+// --- LOGIN LOGIC ---
+function attemptLogin() {
+    const user = document.getElementById('username').value.trim();
+    const pass = document.getElementById('password').value;
+    const errorMsg = document.getElementById('login-error');
     
-    toast('l-toast', 'ok', 'Access requested! Admin will review and grant access.');
-    document.getElementById('l-pass').value = '';
-  }
+    if (allowedUsers.hasOwnProperty(user)) {
+        if (allowedUsers[user] === pass) {
+            document.getElementById('login-wrapper').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            document.body.style.background = '#fff';
+            errorMsg.style.display = 'none';
+
+            // Show Admin Panel Button ONLY if Master Admin logs in
+            if (user === MASTER_ADMIN) {
+                document.getElementById('btn-admin').style.display = 'block';
+            }
+        } else {
+            errorMsg.innerText = "Invalid Password.";
+            errorMsg.style.display = 'block';
+        }
+    } else {
+        errorMsg.innerText = "Access Denied. Account not found.";
+        errorMsg.style.display = 'block';
+    }
+}
+function handleEnter(e) { if (e.key === 'Enter') attemptLogin(); }
+
+// --- ADMIN PANEL FUNCTIONS ---
+function openAdminModal() {
+    document.getElementById('admin-modal').style.display = 'block';
+    renderAdminTable();
+}
+function closeAdminModal() { document.getElementById('admin-modal').style.display = 'none'; }
+
+function renderAdminTable() {
+    const tbody = document.getElementById('admin-user-list');
+    tbody.innerHTML = '';
+    for (let email in allowedUsers) {
+        let isMaster = (email === MASTER_ADMIN);
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${email} ${isMaster ? '(Admin)' : ''}</td>
+            <td>${allowedUsers[email]}</td>
+            <td>${isMaster ? '-' : `<button class="delete-btn" onclick="deleteUser('${email}')">Delete</button>`}</td>
+        `;
+        tbody.appendChild(tr);
+    }
 }
 
-function doLogout(){
-  clearSession();
-  document.getElementById('l-user').value='';
-  document.getElementById('l-pass').value='';
-  hideToast('l-toast');
-  show('login-screen');
+function addNewUser() {
+    const email = document.getElementById('new-user-email').value.trim();
+    const pass = document.getElementById('new-user-pass').value.trim();
+    if(email === '' || pass === '') { alert('Enter both email and password.'); return; }
+    
+    allowedUsers[email] = pass;
+    saveUsers();
+    document.getElementById('new-user-email').value = '';
+    document.getElementById('new-user-pass').value = '';
 }
 
-/* ═══════════ ADMIN PANEL ═══════════ */
-function showAdminPanel(){
-  const s=getSession();if(!s)return;
-  document.getElementById('adm-user').textContent='Logged in as: '+s.name;
-  renderAdmin();
-  show('admin-screen');
+function deleteUser(email) {
+    if(email === MASTER_ADMIN) return;
+    if(confirm(`Are you sure you want to remove access for ${email}?`)) {
+        delete allowedUsers[email];
+        saveUsers();
+    }
 }
 
-function renderAdmin(){
-  const users=getUsers().filter(u=>u.username!=='admin');
-  const pending=users.filter(u=>u.status==='pending');
-  document.getElementById('pend-count').textContent=pending.length;
-  const pb=document.getElementById('pend-body');
-  if(pending.length===0){
-    pb.innerHTML='<tr class="empty-row"><td colspan="5">No pending requests</td></tr>';
-  } else {
-    pb.innerHTML=pending.map(u=>`
-      <tr>
-        <td><strong>${u.name}</strong></td>
-        <td>${u.email}</td>
-        <td>${u.username}</td>
-        <td>${new Date(u.createdAt).toLocaleDateString('en-IN')}</td>
-        <td>
-          <button class="ab ab-ok" onclick="approveUser('${u.id}')">&#10003; Approve</button>
-          <button class="ab ab-rej" onclick="rejectUser('${u.id}')">&#10007; Reject</button>
-        </td>
-      </tr>`).join('');
-  }
-  const ab=document.getElementById('all-body');
-  if(users.length===0){
-    ab.innerHTML='<tr class="empty-row"><td colspan="5">No users registered yet</td></tr>';
-  } else {
-    ab.innerHTML=users.map(u=>{
-      const badge=u.status==='approved'?'<span class="sb sb-ok">Approved</span>':
-                  u.status==='rejected'?'<span class="sb sb-rej">Rejected</span>':
-                  '<span class="sb sb-pend">Pending</span>';
-      const btns=(u.status==='pending'
-        ?`<button class="ab ab-ok" onclick="approveUser('${u.id}')">Approve</button><button class="ab ab-rej" onclick="rejectUser('${u.id}')">Reject</button>`
-        :u.status==='approved'
-        ?`<button class="ab ab-rej" onclick="rejectUser('${u.id}')">Revoke</button>`
-        :`<button class="ab ab-ok" onclick="approveUser('${u.id}')">Restore</button>`)
-        +`<button class="ab ab-del" onclick="deleteUser('${u.id}')">Delete</button>`;
-      return `<tr><td><strong>${u.name}</strong></td><td>${u.username}</td><td>${u.email}</td><td>${badge}</td><td>${btns}</td></tr>`;
-    }).join('');
-  }
-}
 
-function approveUser(uid){
-  const u=getUsers();const x=u.find(v=>v.id===uid);if(x){x.status='approved';saveUsers(u);}renderAdmin();
-}
-function rejectUser(uid){
-  if(!confirm('Reject / revoke this user?'))return;
-  const u=getUsers();const x=u.find(v=>v.id===uid);if(x){x.status='rejected';saveUsers(u);}renderAdmin();
-}
-function deleteUser(uid){
-  if(!confirm('Permanently delete this user?'))return;
-  saveUsers(getUsers().filter(v=>v.id!==uid));renderAdmin();
-}
-function goToApp(){showApp();}
-
-/* ═══════════ MAIN APP ═══════════ */
-function showApp(){
-  const s=getSession();if(!s)return;
-  document.getElementById('app-uname').textContent=s.name;
-  document.getElementById('adm-btn').style.display=s.role==='admin'?'inline-block':'none';
-  updateDropdowns();
-  document.getElementById('rpt-wrapper').style.display='none';
-  document.getElementById('sel-form').style.display='block';
-  show('app-screen');
-}
-
-/* ═══════════ SESSION CHECK ON LOAD ═══════════ */
-window.addEventListener('DOMContentLoaded',function(){
-  const s=getSession();
-  if(!s){show('login-screen');return;}
-  if(s.role==='admin')showAdminPanel();else showApp();
-});
-
-/* ═══════════ CHILLER DATA ═══════════ */
-const chillerCSV=`Model,Condition,ModelName,NumCompressors,Refrigerant,NumFans,NumCoils,FlowDesign,FF,Alt,Passes,Mat,WB,L1,W1,H1,SW1,OW1,RC1,L2,W2,H2,RC2,SW2,OW2,OilCh,CompRLA1,CompRLA2,CompRLA3,CompRLA4,ResultVal,C100,P100,COP100,RLA100,F100,EI100,EO100,PD100,AM100,C75,P75,COP75,RLA75,F75,EI75,EO75,PD75,AM75,C50,P50,COP50,RLA50,F50,EI50,EO50,PD50,AM50,C25,P25,COP25,RLA25,F25,EI25,EO25,PD25,AM25,Elev_C,Elev_P,Elev_COP,Elev_RLA,Elev_F,Elev_EI,Elev_EO,Elev_PD,Elev_AM
+// --- DATA FOR CHILLERS ---
+const chillerCSV = `Model,Condition,ModelName,NumCompressors,Refrigerant,NumFans,NumCoils,FlowDesign,FF,Alt,Passes,Mat,WB,L1,W1,H1,SW1,OW1,RC1,L2,W2,H2,RC2,SW2,OW2,OilCh,CompRLA1,CompRLA2,CompRLA3,CompRLA4,ResultVal,C100,P100,COP100,RLA100,F100,EI100,EO100,PD100,AM100,C75,P75,COP75,RLA75,F75,EI75,EO75,PD75,AM75,C50,P50,COP50,RLA50,F50,EI50,EO50,PD50,AM50,C25,P25,COP25,RLA25,F25,EI25,EO25,PD25,AM25,Elev_C,Elev_P,Elev_COP,Elev_RLA,Elev_F,Elev_EI,Elev_EO,Elev_PD,Elev_AM
 KAC011,BEE,KAC011.20,2,R410A,2,2,6.147,0.018,0,1,Cu,NA,1721,1140,1469,436,561,11,2071,949,1436,11,436,561,NA,11.1,11.1,NA,NA,3.38,35.72,12.70,2.813,22.2,6.147,12.00,7.0,40,35.0,26.790,10.31,2.598,19.05,6.147,10.75,7.0,40,27.0,17.860,4.05,4.412,8.487,6.147,9.50,7.0,40,19.00,8.93000000000,3.09,2.893,7.849,6.147,8.25,7.0,40,13.00,33.36,13.60,2.450,23.6,6.147,12,7,40,39
 KAC011,AHRI,KAC011.20,2,R410A,2,2,6.147,0.018,0,1,Cu,NA,1721,1140,1469,436,561,11,2071,949,1436,11,436,561,NA,11.1,11.1,NA,NA,3.33,36.660,12.70,2.887,22.2,6.147,12.00,7.0,40,35.0,27.495,10.31,2.667,19.05,6.147,10.75,7.0,40,27.0,18.330,4.05,4.528,8.487,6.147,9.50,7.0,40,19.00,9.165,3.09,2.969,7.849,6.147,8.25,7.0,40,13.00,33.36,13.60,2.450,23.6,6.147,12,7,40,39
 KAC022,BEE,KAC022.20,2,R410A,2,2,13.83,0.018,0,1,Cu,NA,2121,1400,1864,598,630,16,2570,1092,1869,16,598,630,NA,22.94,22.94,NA,NA,3.40,80.34,26.76,3.002,45.88,13.83,12.00,7.0,40,35.0,60.26,21.96,2.744,40.2,13.83,10.75,7.0,40,27.0,40.17,8.92,4.504,18.31,13.83,9.50,7.0,40,19.00,20.09,7.06,2.847,17.36,13.83,8.25,7.0,40,13.00,73.24,28.78,2.545,48.46,13.83,12,7,40,39
 KAC022,AHRI,KAC022.20,2,R410A,2,2,13.83,0.018,0,1,Cu,NA,2121,1400,1864,598,630,16,2570,1092,1869,16,598,630,NA,22.94,22.94,NA,NA,3.35,80.340,24.96,3.002,45.88,13.83,12.00,7.0,40,35.0,60.255,20.16,2.744,40.2,13.83,10.75,7.0,40,27.0,40.170,8.02,4.504,18.31,13.83,9.50,7.0,40,19.00,20.085,6.16,2.847,17.36,13.83,8.25,7.0,40,13.00,73.24,28.78,2.545,48.46,13.83,12,7,40,39
 KAC044,BEE,KAC044.40,4,R410A,2,4,27.67,0.018,0,1,Cu,NA,3093,1574,2189,1455,1560,44,3093,1574,2189,44,1455,1560,NA,22.94,22.94,22.94,22.94,3.91,160.680,54.32,2.958,91.76,27.67,12.00,7.0,40,35.0,120.510,34.64,3.479,60.30,27.67,10.75,7.0,40,27.0,80.340,18.24,4.405,36.62,27.67,9.50,7.0,40,19.00,40.170,8.36,4.807,17.36,27.67,8.25,7.0,40,13.00,146.48,58.36,2.510,96.92,27.67,12,7,40,39
 KAC044,AHRI,KAC044.40,4,R410A,2,4,27.67,0.018,0,1,Cu,NA,3093,1574,2189,1455,1560,44,3093,1574,2189,44,1455,1560,NA,22.94,22.94,22.94,22.94,3.98,160.680,49.92,2.958,91.76,27.67,12.00,7.0,40,35.0,120.510,30.24,3.479,60.30,27.67,10.75,7.0,40,27.0,80.340,16.04,4.405,36.62,27.67,9.50,7.0,40,19.00,40.170,6.16,4.807,17.36,27.67,8.25,7.0,40,13.00,146.48,58.36,2.510,96.92,27.67,12,7,40,39`;
-let chillerDB=[];
-const _ln=chillerCSV.trim().split('\n'),_hd=_ln[0].split(',');
-chillerDB=_ln.slice(1).map(l=>{const v=l.split(',');let o={};_hd.forEach((h,i)=>o[h]=v[i]);return o;});
 
-const hpData=[
-  {model:'KSE-AH-14U',cap:14,cop:4.2,hotWater:'400',ratedTemp:'55',maxTemp:'60',power:'3.8',current:'6.4',supply:'380~415V/50Hz/3Ph',comp:'Scroll (Copeland/Panasonic)',compQty:1,heatex:'Tube-in-Shell / Brazed Plate',evap:'Blue Finned Evaporator Coil',throttle:'TXV/EEV',flow:'2.5',fanQty:1,ref:'R410A/R407C',noise:'≤65',pipe:'R1',dim:'800 × 800 × 1110',weight:140},
-  {model:'KSE-AH-19U',cap:19,cop:4.2,hotWater:'540',ratedTemp:'55',maxTemp:'60',power:'4.4',current:'8.4',supply:'380~415V/50Hz/3Ph',comp:'Scroll (Copeland/Panasonic)',compQty:1,heatex:'Tube-in-Shell / Brazed Plate',evap:'Blue Finned Evaporator Coil',throttle:'TXV/EEV',flow:'3.2',fanQty:1,ref:'R410A/R407C',noise:'≤65',pipe:'R1',dim:'800 × 800 × 1110',weight:180},
-  {model:'KSE-AH-25U',cap:25,cop:4.15,hotWater:'710',ratedTemp:'55',maxTemp:'60',power:'6',current:'11.4',supply:'380~415V/50Hz/3Ph',comp:'Scroll (Copeland/Panasonic)',compQty:1,heatex:'Tube-in-Shell / Brazed Plate',evap:'Blue Finned Evaporator Coil',throttle:'TXV/EEV',flow:'4.3',fanQty:1,ref:'R410A/R407C',noise:'≤65',pipe:'R1',dim:'800 × 800 × 1025',weight:200},
-  {model:'KSE-AH-37U',cap:37,cop:4.2,hotWater:'1070',ratedTemp:'55',maxTemp:'60',power:'8.8',current:'16.7',supply:'380~415V/50Hz/3Ph',comp:'Scroll (Copeland/Panasonic)',compQty:2,heatex:'Tube-in-Shell / Brazed Plate',evap:'Blue Finned Evaporator Coil',throttle:'TXV/EEV',flow:'6.5',fanQty:2,ref:'R410A/R407C',noise:'≤65',pipe:'R1-1/2',dim:'1450 × 890 × 1110',weight:310},
-  {model:'KSE-AH-45U',cap:45,cop:4.16,hotWater:'1270',ratedTemp:'55',maxTemp:'60',power:'11.1',current:'20.1',supply:'380~415V/50Hz/3Ph',comp:'Scroll (Copeland/Panasonic)',compQty:1,heatex:'Tube-in-Shell / Brazed Plate',evap:'Blue Finned Evaporator Coil',throttle:'TXV/EEV',flow:'7.5',fanQty:1,ref:'R410A/R407C',noise:'≤66',pipe:'R1-1/2',dim:'975 × 975 × 1300',weight:325},
-  {model:'KSE-AH-50U',cap:50,cop:4.2,hotWater:'1480',ratedTemp:'55',maxTemp:'60',power:'12.1',current:'23.1',supply:'380~415V/50Hz/3Ph',comp:'Scroll (Copeland/Panasonic)',compQty:2,heatex:'Tube-in-Shell / Brazed Plate',evap:'Blue Finned Evaporator Coil',throttle:'TXV/EEV',flow:'8.7',fanQty:2,ref:'R410A/R407C',noise:'≤67',pipe:'R1-1/2',dim:'1600 × 990 × 1150',weight:365},
-  {model:'KSE-AH-70V',cap:70,cop:4.1,hotWater:'2030',ratedTemp:'55',maxTemp:'60',power:'17.1',current:'32.4',supply:'380~415V/50Hz/3Ph',comp:'Scroll (Copeland/Panasonic)',compQty:2,heatex:'Tube-in-Shell / Brazed Plate',evap:'Blue Finned Evaporator Coil',throttle:'TXV/EEV',flow:'12',fanQty:2,ref:'R410A/R407C',noise:'≤70',pipe:'R1-1/2',dim:'1850 × 950 × 1635',weight:610},
-  {model:'KSE-AH-90V',cap:90,cop:4.15,hotWater:'2600',ratedTemp:'55',maxTemp:'60',power:'21.7',current:'41.2',supply:'380~415V/50Hz/3Ph',comp:'Scroll (Copeland/Panasonic)',compQty:2,heatex:'Tube-in-Shell / Brazed Plate',evap:'Blue Finned Evaporator Coil',throttle:'TXV/EEV',flow:'15.5',fanQty:2,ref:'R410A/R407C',noise:'≤72',pipe:'R2',dim:'2250 × 1090 × 1785',weight:740},
-  {model:'KSE-AH-100V',cap:100,cop:4.2,hotWater:'2970',ratedTemp:'55',maxTemp:'60',power:'23.8',current:'45.6',supply:'380~415V/50Hz/3Ph',comp:'Scroll (Copeland/Panasonic)',compQty:2,heatex:'Tube-in-Shell / Brazed Plate',evap:'Blue Finned Evaporator Coil',throttle:'TXV/EEV',flow:'17.3',fanQty:2,ref:'R410A/R407C',noise:'≤72',pipe:'R2',dim:'2250 × 1090 × 1785',weight:820},
-  {model:'KSE-AH-140V',cap:140,cop:4.1,hotWater:'4060',ratedTemp:'55',maxTemp:'60',power:'34.1',current:'64.9',supply:'380~415V/50Hz/3Ph',comp:'Scroll (Copeland/Panasonic)',compQty:4,heatex:'Tube-in-Shell / Brazed Plate',evap:'Blue Finned Evaporator Coil',throttle:'TXV/EEV',flow:'24',fanQty:4,ref:'R410A/R407C',noise:'≤75',pipe:'R2-1/2',dim:'2200 × 2100 × 1800',weight:1150},
-  {model:'KSE-AH-180V',cap:180,cop:4.15,hotWater:'5220',ratedTemp:'55',maxTemp:'60',power:'43.4',current:'82.4',supply:'380~415V/50Hz/3Ph',comp:'Scroll (Copeland/Panasonic)',compQty:4,heatex:'Tube-in-Shell / Brazed Plate',evap:'Blue Finned Evaporator Coil',throttle:'TXV/EEV',flow:'30.9',fanQty:4,ref:'R410A/R407C',noise:'≤78',pipe:'R2-1/2',dim:'2200 × 2100 × 1800',weight:1300},
-  {model:'KSE-SP-11U',cap:11,cop:6.7,maxTemp:'45',ratedTemp:'N/A',hotWater:'N/A',supply:'380~415V/50Hz/3Ph',power:'1.8',current:'3.7',maxPower:'2.9',maxCurrent:'5.2',evap:'Blue Finned Evaporator Coil',throttle:'TXV / EEV',heatex:'PVC Shell Titanium',ref:'R410A/R407C',comp:'Reciprocating (Copeland)',compQty:1,fanQty:1,fanDir:'Horizontal',flow:'5',pipe:'Rc1-1/2',noise:'≤53',dim:'1250 x 660 x 725',weight:120},
-  {model:'KSE-SP-17U',cap:17,cop:6.7,maxTemp:'45',ratedTemp:'N/A',hotWater:'N/A',supply:'380~415V/50Hz/3Ph',power:'2.5',current:'5.3',maxPower:'4.1',maxCurrent:'7.2',evap:'Blue Finned Evaporator Coil',throttle:'TXV / EEV',heatex:'PVC Shell Titanium',ref:'R410A/R407C',comp:'Reciprocating (Copeland)',compQty:1,fanQty:1,fanDir:'Horizontal',flow:'7.6',pipe:'Rc1-1/2',noise:'≤55',dim:'1250 x 660 x 725',weight:145},
-  {model:'KSE-SP-25U',cap:25,cop:6.7,maxTemp:'45',ratedTemp:'N/A',hotWater:'N/A',supply:'380~415V/50Hz/3Ph',power:'3.7',current:'8',maxPower:'5',maxCurrent:'9.5',evap:'Blue Finned Evaporator Coil',throttle:'TXV / EEV',heatex:'PVC Shell Titanium',ref:'R410A/R407C',comp:'Scroll (Copeland/Panasonic)',compQty:1,fanQty:1,fanDir:'Vertical',flow:'11.2',pipe:'Rc1-1/2',noise:'≤56',dim:'800 × 800 × 1110',weight:170},
-  {model:'KSE-SP-35U',cap:35,cop:6.8,maxTemp:'45',ratedTemp:'N/A',hotWater:'N/A',supply:'380~415V/50Hz/3Ph',power:'5.1',current:'10.6',maxPower:'8.6',maxCurrent:'15.2',evap:'Blue Finned Evaporator Coil',throttle:'TXV / EEV',heatex:'PVC Shell Titanium',ref:'R410A/R407C',comp:'Scroll (Copeland/Panasonic)',compQty:1,fanQty:1,fanDir:'Vertical',flow:'15',pipe:'Rc2',noise:'≤61',dim:'975 × 975 × 1300',weight:240},
-  {model:'KSE-SP-50U',cap:50,cop:6.7,maxTemp:'45',ratedTemp:'N/A',hotWater:'N/A',supply:'380~415V/50Hz/3Ph',power:'7.4',current:'16',maxPower:'11',maxCurrent:'23',evap:'Blue Finned Evaporator Coil',throttle:'TXV / EEV',heatex:'PVC Shell Titanium',ref:'R410A/R407C',comp:'Scroll (Copeland/Panasonic)',compQty:2,fanQty:2,fanDir:'Vertical',flow:'23',pipe:'Rc2',noise:'≤66',dim:'1450 × 890 × 1110',weight:320},
-  {model:'KSE-SP-220V',cap:220,cop:6.9,maxTemp:'45',ratedTemp:'N/A',hotWater:'N/A',supply:'380~415V/50Hz/3Ph',power:'33.6',current:'66.2',maxPower:'52',maxCurrent:'90.4',evap:'Coil Blue Finned Evaporator Coil',throttle:'TXV / EEV',heatex:'PVC Shell Titanium',ref:'R410a/R407C',comp:'Scroll (Copeland/Panasonic)',compQty:4,fanQty:4,fanDir:'Vertical',flow:'95',pipe:'Rc4',noise:'≤76',dim:'2200 × 2100 × 1800',weight:1180}
+let chillerDB = [];
+const lines = chillerCSV.trim().split('\n');
+const headers = lines[0].split(',');
+chillerDB = lines.slice(1).map(l => {
+    const v = l.split(',');
+    let o = {};
+    headers.forEach((h, i) => o[h] = v[i]);
+    return o;
+});
+
+// --- DATA FOR HEAT PUMPS ---
+const hpData = [
+    { model: 'KSE-AH-14U', cap: 14, cop: 4.2, hotWater: '400', ratedTemp: '55', maxTemp: '60', power: '3.8', current: '6.4', supply: '380~415V/50Hz/3Ph', comp: 'Scroll (Copeland/Panasonic)', compQty: 1, heatex: 'Tube-in-Shell / Brazed Plate', evap: 'Blue Finned ', throttle: 'EXV/TXV', flow: '2.5', fanQty: 1, ref: 'R410A', noise: '≤65', pipe: 'R1', dim: '800 × 800 × 1110', weight: 140 },
+    { model: 'KSE-AH-19U', cap: 19, cop: 4.2, hotWater: '540', ratedTemp: '55', maxTemp: '60', power: '4.4', current: '8.4', supply: '380~415V/50Hz/3Ph', comp: 'Scroll (Copeland/Panasonic)', compQty: 1, heatex: 'Tube-in-Shell / Brazed Plate', evap: 'Blue Finned ', throttle: 'EXV/TXV', flow: '3.2', fanQty: 1, ref: 'R410A', noise: '≤65', pipe: 'R1', dim: '800 × 800 × 1110', weight: 180 },
+    { model: 'KSE-AH-25U', cap: 25, cop: 4.15, hotWater: '710', ratedTemp: '55', maxTemp: '60', power: '6', current: '11.4', supply: '380~415V/50Hz/3Ph', comp: 'Scroll (Copeland/Panasonic)', compQty: 1, heatex: 'Tube-in-Shell / Brazed Plate', evap: 'Blue Finned ', throttle: 'EXV/TXV', flow: '4.3', fanQty: 1, ref: 'R410A', noise: '≤65', pipe: 'R1', dim: '800 × 800 × 1025', weight: 200 },
+    { model: 'KSE-AH-37U', cap: 37, cop: 4.2, hotWater: '1070', ratedTemp: '55', maxTemp: '60', power: '8.8', current: '16.7', supply: '380~415V/50Hz/3Ph', comp: 'Scroll (Copeland/Panasonic)', compQty: 2, heatex: 'Tube-in-Shell / Brazed Plate', evap: 'Blue Finned ', throttle: 'EXV/TXV', flow: '6.5', fanQty: 2, ref: 'R410A', noise: '≤65', pipe: 'R1-1/2', dim: '1450 × 890 × 1110', weight: 310 },
+    { model: 'KSE-AH-45U', cap: 45, cop: 4.16, hotWater: '1270', ratedTemp: '55', maxTemp: '60', power: '11.1', current: '20.1', supply: '380~415V/50Hz/3Ph', comp: 'Scroll (Copeland/Panasonic)', compQty: 1, heatex: 'Tube-in-Shell / Brazed Plate', evap: 'Blue Finned ', throttle: 'EXV/TXV', flow: '7.5', fanQty: 1, ref: 'R410A', noise: '≤66', pipe: 'R1-1/2', dim: '975 × 975 × 1300', weight: 325 },
+    { model: 'KSE-AH-50U', cap: 50, cop: 4.2, hotWater: '1480', ratedTemp: '55', maxTemp: '60', power: '12.1', current: '23.1', supply: '380~415V/50Hz/3Ph', comp: 'Scroll (Copeland/Panasonic)', compQty: 2, heatex: 'Tube-in-Shell / Brazed Plate', evap: 'Blue Finned ', throttle: 'EXV/TXV', flow: '8.7', fanQty: 2, ref: 'R410A', noise: '≤67', pipe: 'R1-1/2', dim: '1600 × 990 × 1150', weight: 365 },
+    { model: 'KSE-AH-70V', cap: 70, cop: 4.1, hotWater: '2030', ratedTemp: '55', maxTemp: '60', power: '17.1', current: '32.4', supply: '380~415V/50Hz/3Ph', comp: 'Scroll (Copeland/Panasonic)', compQty: 2, heatex: 'Tube-in-Shell / Brazed Plate', evap: 'Blue Finned ', throttle: 'EXV/TXV', flow: '12', fanQty: 2, ref: 'R410A', noise: '≤70', pipe: 'R1-1/2', dim: '1850 × 950 × 1635', weight: 610 },
+    { model: 'KSE-AH-90V', cap: 90, cop: 4.15, hotWater: '2600', ratedTemp: '55', maxTemp: '60', power: '21.7', current: '41.2', supply: '380~415V/50Hz/3Ph', comp: 'Scroll (Copeland/Panasonic)', compQty: 2, heatex: 'Tube-in-Shell / Brazed Plate', evap: 'Blue Finned ', throttle: 'EXV/TXV', flow: '15.5', fanQty: 2, ref: 'R410A', noise: '≤72', pipe: 'R2', dim: '2250 × 1090 × 1785', weight: 740 },
+    { model: 'KSE-AH-100V', cap: 100, cop: 4.2, hotWater: '2970', ratedTemp: '55', maxTemp: '60', power: '23.8', current: '45.6', supply: '380~415V/50Hz/3Ph', comp: 'Scroll (Copeland/Panasonic)', compQty: 2, heatex: 'Tube-in-Shell / Brazed Plate', evap: 'Blue Finned ', throttle: 'EXV/TXV', flow: '17.3', fanQty: 2, ref: 'R410A', noise: '≤72', pipe: 'R2', dim: '2250 × 1090 × 1785', weight: 820 },
+    { model: 'KSE-AH-140V', cap: 140, cop: 4.1, hotWater: '4060', ratedTemp: '55', maxTemp: '60', power: '34.1', current: '64.9', supply: '380~415V/50Hz/3Ph', comp: 'Scroll (Copeland/Panasonic)', compQty: 4, heatex: 'Tube-in-Shell / Brazed Plate', evap: 'Blue Finned ', throttle: 'EXV/TXV', flow: '24', fanQty: 4, ref: 'R410A', noise: '≤75', pipe: 'R2-1/2', dim: '2200 × 2100 × 1800', weight: 1150 },
+    { model: 'KSE-AH-180V', cap: 180, cop: 4.15, hotWater: '5220', ratedTemp: '55', maxTemp: '60', power: '43.4', current: '82.4', supply: '380~415V/50Hz/3Ph', comp: 'Scroll (Copeland/Panasonic)', compQty: 4, heatex: 'Tube-in-Shell / Brazed Plate', evap: 'Blue Finned ', throttle: 'EXV/TXV', flow: '30.9', fanQty: 4, ref: 'R410A', noise: '≤78', pipe: 'R2-1/2', dim: '2200 × 2100 × 1800', weight: 1300 },
+    
+    { model: 'KSE-SP-11U', cap: 11, cop: 6.7, maxTemp: '45', ratedTemp: 'N/A', hotWater: 'N/A', supply: '380~415V/50Hz/3Ph', power: '1.8', current: '3.7', maxPower: '2.9', maxCurrent: '5.2', evap: 'Blue Finned ', throttle: 'EXV/TXV', heatex: 'PVC Shell Titanium', ref: 'R410A', comp: 'Reciprocating (Copeland)', compQty: 1, fanQty: 1, fanDir: 'Horizontal', flow: '5', pipe: 'Rc1-1/2', noise: '≤53', dim: '1250 x 660 x 725', weight: 120 },
+    { model: 'KSE-SP-17U', cap: 17, cop: 6.7, maxTemp: '45', ratedTemp: 'N/A', hotWater: 'N/A', supply: '380~415V/50Hz/3Ph', power: '2.5', current: '5.3', maxPower: '4.1', maxCurrent: '7.2', evap: 'Blue Finned ', throttle: 'EXV/TXV', heatex: 'PVC Shell Titanium', ref: 'R410A', comp: 'Reciprocating (Copeland)', compQty: 1, fanQty: 1, fanDir: 'Horizontal', flow: '7.6', pipe: 'Rc1-1/2', noise: '≤55', dim: '1250 x 660 x 725', weight: 145 },
+    { model: 'KSE-SP-25U', cap: 25, cop: 6.7, maxTemp: '45', ratedTemp: 'N/A', hotWater: 'N/A', supply: '380~415V/50Hz/3Ph', power: '3.7', current: '8', maxPower: '5', maxCurrent: '9.5', evap: 'Blue Finned ', throttle: 'EXV/TXV', heatex: 'PVC Shell Titanium', ref: 'R410A', comp: 'Scroll (Copeland/Panasonic)', compQty: 1, fanQty: 1, fanDir: 'Vertical', flow: '11.2', pipe: 'Rc1-1/2', noise: '≤56', dim: '800 × 800 × 1110', weight: 170 },
+    { model: 'KSE-SP-35U', cap: 35, cop: 6.8, maxTemp: '45', ratedTemp: 'N/A', hotWater: 'N/A', supply: '380~415V/50Hz/3Ph', power: '5.1', current: '10.6', maxPower: '8.6', maxCurrent: '15.2', evap: 'Blue Finned ', throttle: 'EXV/TXV', heatex: 'PVC Shell Titanium', ref: 'R410A', comp: 'Scroll (Copeland/Panasonic)', compQty: 1, fanQty: 1, fanDir: 'Vertical', flow: '15', pipe: 'Rc2', noise: '≤61', dim: '975 × 975 × 1300', weight: 240 },
+    { model: 'KSE-SP-50U', cap: 50, cop: 6.7, maxTemp: '45', ratedTemp: 'N/A', hotWater: 'N/A', supply: '380~415V/50Hz/3Ph', power: '7.4', current: '16', maxPower: '11', maxCurrent: '23', evap: 'Blue Finned ', throttle: 'EXV/TXV', heatex: 'PVC Shell Titanium', ref: 'R410A', comp: 'Scroll (Copeland/Panasonic)', compQty: 2, fanQty: 2, fanDir: 'Vertical', flow: '23', pipe: 'Rc2', noise: '≤66', dim: '1450 × 890 × 1110', weight: 320 },
+    { model: 'KSE-SP-65U', cap: 60, cop: 6.7, maxTemp: '45', ratedTemp: 'N/A', hotWater: 'N/A', supply: '380~415V/50Hz/3Ph', power: '9.7', current: '21', maxPower: '15.8', maxCurrent: '29', evap: 'Coil Blue Finned ', throttle: 'EXV/TXV', heatex: 'PVC Shell Titanium', ref: 'R410a', comp: 'Scroll (Copeland/Panasonic)', compQty: 2, fanQty: 2, fanDir: 'Vertical', flow: '30', pipe: 'Rc2', noise: '≤66', dim: '1600 × 990 × 1150', weight: 410 },
+    { model: 'KSE-SP-80V', cap: 80, cop: 6.9, maxTemp: '45', ratedTemp: 'N/A', hotWater: 'N/A', supply: '380~415V/50Hz/3Ph', power: '11.8', current: '24', maxPower: '17.2', maxCurrent: '30.4', evap: 'Coil Blue Finned ', throttle: 'EXV/TXV', heatex: 'PVC Shell Titanium', ref: 'R410a', comp: 'Scroll (Copeland/Panasonic)', compQty: 2, fanQty: 2, fanDir: 'Vertical', flow: '35', pipe: 'Rc2-1/2', noise: '≤66', dim: '1850 × 950 × 1635', weight: 540 },
+    { model: 'KSE-SP-90V', cap: 90, cop: 6.9, maxTemp: '45', ratedTemp: 'N/A', hotWater: 'N/A', supply: '380~415V/50Hz/3Ph', power: '13', current: '25.8', maxPower: '20.5', maxCurrent: '35.5', evap: 'Coil Blue Finned ', throttle: 'EXV/TXV', heatex: 'PVC Shell Titanium', ref: 'R410a', comp: 'Scroll (Copeland/Panasonic)', compQty: 2, fanQty: 2, fanDir: 'Vertical', flow: '40', pipe: 'Rc2-1/2', noise: '≤66', dim: '1850 × 950 × 1635', weight: 570 },
+    { model: 'KSE-SP-110V', cap: 110, cop: 6.9, maxTemp: '45', ratedTemp: 'N/A', hotWater: 'N/A', supply: '380~415V/50Hz/3Ph', power: '16.8', current: '33.1', maxPower: '26', maxCurrent: '45.2', evap: 'Coil Blue Finned ', throttle: 'EXV/TXV', heatex: 'PVC Shell Titanium', ref: 'R410a', comp: 'Scroll (Copeland/Panasonic)', compQty: 2, fanQty: 2, fanDir: 'Vertical', flow: '47', pipe: 'Rc3', noise: '≤68', dim: '2250 × 1090 × 1785', weight: 750 },
+    { model: 'KSE-SP-140V', cap: 140, cop: 6.6, maxTemp: '45', ratedTemp: 'N/A', hotWater: 'N/A', supply: '380~415V/50Hz/3Ph', power: '20.2', current: '44.8', maxPower: '31', maxCurrent: '57.6', evap: 'Coil Blue Finned ', throttle: 'EXV/TXV', heatex: 'PVC Shell Titanium', ref: 'R410a', comp: 'Scroll (Copeland/Panasonic)', compQty: 2, fanQty: 2, fanDir: 'Vertical', flow: '60', pipe: 'Rc3', noise: '≤70', dim: '2250 × 1090 × 1785', weight: 820 },
+    { model: 'KSE-SP-220V', cap: 220, cop: 6.9, maxTemp: '45', ratedTemp: 'N/A', hotWater: 'N/A', supply: '380~415V/50Hz/3Ph', power: '33.6', current: '66.2', maxPower: '52', maxCurrent: '90.4', evap: 'Coil Blue Finned ', throttle: 'EXV/TXV', heatex: 'PVC Shell Titanium', ref: 'R410a', comp: 'Scroll (Copeland/Panasonic)', compQty: 4, fanQty: 4, fanDir: 'Vertical', flow: '95', pipe: 'Rc4', noise: '≤76', dim: '2200 × 2100 × 1800', weight: 1180 }
 ];
-const BEE_STAR={'KAC011':'2 Star','KAC022':'2 Star','KAC044':'3 Star'};
-function f2(v){let n=parseFloat(v);return isNaN(n)?v:n.toFixed(2);}
-function f3(v){let n=parseFloat(v);return isNaN(n)?v:n.toFixed(3);}
-function fD(v){let n=parseFloat(v);if(isNaN(n))return v;return Math.floor(Math.abs(n))>=10?n.toFixed(2):n.toFixed(3);}
-function fF(v){let n=parseFloat(v);if(isNaN(n))return v;return Math.floor(Math.abs(n))>=10?n.toFixed(2):n.toFixed(3);}
-function _v(v){if(v===undefined||v===null||v==='N/A'||v==='NA'||String(v).trim()==='')return '-';return v;}
 
-function updateDropdowns(){
-  const app=document.getElementById('app-select').value;
-  const ms=document.getElementById('model-select');
-  const cs=document.getElementById('cond-select');
-  ms.innerHTML='';cs.innerHTML='';
-  if(app==='Chiller'){
-    ms.innerHTML='<option value="KAC011">KAC011.20</option><option value="KAC022">KAC022.20</option><option value="KAC044">KAC044.40</option>';
-    cs.innerHTML='<option value="BEE">BEE Condition</option><option value="AHRI">AHRI Condition</option>';
-  } else {
-    hpData.forEach(h=>{let o=document.createElement('option');o.value=h.model;o.text=h.model;ms.appendChild(o);});
-    cs.innerHTML='<option value="UserSpecified">User Specified</option>';
-  }
+const BEE_STAR_LABELS = { 'KAC011': '2 Star', 'KAC022': '2 Star', 'KAC044': '3 Star' };
+
+function fmt2(val) { let n = parseFloat(val); return isNaN(n) ? val : n.toFixed(2); }
+function fmt3(val) { let n = parseFloat(val); return isNaN(n) ? val : n.toFixed(3); }
+function fmtDynamic(val) { let n = parseFloat(val); if(isNaN(n)) return val; return Math.floor(Math.abs(n)) >= 10 ? n.toFixed(2) : n.toFixed(3); }
+function fmtFlow(val) { let n = parseFloat(val); if(isNaN(n)) return val; return Math.floor(Math.abs(n)) >= 10 ? n.toFixed(2) : n.toFixed(3); }
+
+function _v(val) { return (val === undefined || val === null || val === 'N/A' || val === 'NA' || val.toString().trim() === '') ? '-' : val; }
+
+function updateDropdowns() {
+    const app = document.getElementById('app-select').value;
+    const modelSelect = document.getElementById('model-select');
+    const condSelect = document.getElementById('cond-select');
+    
+    modelSelect.innerHTML = '';
+    condSelect.innerHTML = '';
+
+    if (app === 'Chiller') {
+        modelSelect.innerHTML = `<option value="KAC011">KAC011.20</option><option value="KAC022">KAC022.20</option><option value="KAC044">KAC044.40</option>`;
+        condSelect.innerHTML = `<option value="BEE">BEE Condition</option><option value="AHRI">AHRI Condition</option>`;
+    } else {
+        hpData.forEach(hp => {
+            let opt = document.createElement('option');
+            opt.value = hp.model; opt.text = hp.model;
+            modelSelect.appendChild(opt);
+        });
+        condSelect.innerHTML = `<option value="UserSpecified">User Specified</option>`;
+    }
 }
-function goBack(){document.getElementById('rpt-wrapper').style.display='none';document.getElementById('sel-form').style.display='block';}
+updateDropdowns();
 
-function generateReport(){
-  const app=document.getElementById('app-select').value;
-  const mod=document.getElementById('model-select').value;
-  const con=document.getElementById('cond-select').value;
-  document.getElementById('sel-form').style.display='none';
-  document.getElementById('rpt-wrapper').style.display='block';
-  document.getElementById('p-date').innerText=new Date().toLocaleDateString('en-GB')+' '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-  document.getElementById('d-client').innerText=document.getElementById('client').value||'—';
-  document.getElementById('d-project').innerText=document.getElementById('project').value||'—';
-  document.getElementById('d-incharge').innerText=document.getElementById('proj-incharge').value||'—';
-  const notes=document.getElementById('notes-area');
-  if(app==='Chiller'){
-    const d=chillerDB.find(x=>x.Model===mod&&x.Condition===con);if(!d)return;
-    document.getElementById('chiller-sections').style.display='block';
-    document.getElementById('hp-sections').style.display='none';
-    document.getElementById('d-app-type').innerText='Air Cooled Chiller';
-    document.getElementById('d-tech').innerText='Scroll';
-    document.getElementById('d-model-name').innerText=d.ModelName;
-    document.getElementById('d-condition').innerText=con;
-    const star=con==='BEE'?(BEE_STAR[mod]||'3 Star'):'';
-    if(con==='BEE'){document.getElementById('d-bmg').innerText=star.includes('2')?'BMGA2':'BMGA3';document.getElementById('bmg-row').style.display='';document.getElementById('starter-row-ahri').style.display='none';}
-    else{document.getElementById('bmg-row').style.display='none';document.getElementById('starter-row-ahri').style.display='';}
-    if(con==='AHRI'){document.getElementById('d-rating-hdr').innerText='Job Conditions in accordance with AHRI-551/591 (SI)';document.getElementById('d-eff-hdr').innerText='Part Load Data with AHRI-Relief';document.getElementById('d-perf-hdr').innerText='Performance Details At AHRI Relief Load Points';}
-    else{document.getElementById('d-rating-hdr').innerText='RATED PERFORMANCE AT STANDARD RATING CONDITIONS AS PER TABLE 1, IS 16590 : 2023';document.getElementById('d-eff-hdr').innerText='INDIAN SEASONAL ENERGY EFFICIENCY RATIO (ISEER) AS PER ANNEX C, IS 16590 : 2023';document.getElementById('d-perf-hdr').innerText='PERFORMANCE DETAILS';}
-    document.getElementById('comp-data').innerHTML=`<tr><td>No. of Compressors</td><td>${d.NumCompressors}</td></tr><tr><td>Hertz</td><td>50.0 Hz</td></tr><tr><td>Volts</td><td>415 V</td></tr><tr><td>Refrigerant</td><td>${d.Refrigerant}</td></tr>`;
-    document.getElementById('evap-data').innerHTML=`<tr><td>Flow (m³/h)</td><td>${fF(d.FlowDesign)}</td></tr><tr><td>Entering Water Temp (°C)</td><td>12.0</td></tr><tr><td>Leaving Water Temp (°C)</td><td>7.0</td></tr><tr><td>No. of Passes</td><td>${d.Passes}</td></tr><tr><td>Fouling Factor</td><td>${d.FF}</td></tr><tr><td>Pressure Drop (kPa)</td><td>${f2(d.PD100)}</td></tr><tr><td>Tube Material</td><td>Cu</td></tr>`;
-    document.getElementById('cond-data').innerHTML=`<tr><td>Ambient Temperature (°C)</td><td>${f2(d.AM100)}</td></tr><tr><td>No. of condenser Coils</td><td>${d.NumCoils}</td></tr><tr><td>No. of condenser Fans</td><td>${d.NumFans}</td></tr>`;
-    let rla='';[1,2,3,4].forEach(i=>{let val=d['CompRLA'+i];let disp=(val&&val.trim()!=='NA'&&val.trim()!=='')?fD(val):'NA';rla+=`<tr><td style="width:65%">RLA Compressor ${i} (A)</td><td>${disp}</td></tr>`;});
-    document.getElementById('efficiency-table').innerHTML=`<tr><td class="label-cell"> Capacity (kW)</td><td>${f2(d.C100)}</td><td class="label-cell v-sep">75% Load COP</td><td>${f3(d.COP75)}</td><td class="label-cell v-sep">Total RLA (A)</td><td style="text-align:right;padding-right:12px">${fD(d.RLA100)}</td></tr><tr><td class="label-cell">Power(kW)</td><td>${f2(d.P100)}</td><td class="label-cell v-sep">50% Load COP</td><td>${f3(d.COP50)}</td><td rowspan="3" colspan="2" class="v-sep" style="padding:0;vertical-align:top"><table class="inner-table">${rla}</table></td></tr><tr><td class="label-cell">COP (kW/kW)</td><td>${f3(d.COP100)}</td><td class="label-cell v-sep">25% Load COP</td><td>${f3(d.COP25)}</td></tr><tr><td class="label-cell">${con==='BEE'?'ISEER':'IPLV'}</td><td>${f2(d.ResultVal)}</td><td class="label-cell v-sep">${con==='BEE'?'BEE Star Rating':''}</td><td>${con==='BEE'?star:''}</td></tr>`;
-    const ns=(con==='BEE'&&(mod==='KAC011'||mod==='KAC022'));
-    const pts=[{id:1,lp:100,c:d.C100,p:d.P100,cop:d.COP100,rla:d.RLA100,f:d.F100,tin:d.EI100,tout:d.EO100,pd:d.PD100,amb:d.AM100},{id:2,lp:75,c:d.C75,p:d.P75,cop:d.COP75,rla:d.RLA75,f:d.F75,tin:d.EI75,tout:d.EO75,pd:d.PD75,amb:d.AM75},{id:3,lp:50,c:d.C50,p:d.P50,cop:d.COP50,rla:d.RLA50,f:d.F50,tin:d.EI50,tout:d.EO50,pd:d.PD50,amb:d.AM50},{id:4,lp:25,c:d.C25,p:d.P25,cop:d.COP25,rla:d.RLA25,f:d.F25,tin:d.EI25,tout:d.EO25,pd:d.PD25,amb:d.AM25}];
-    document.getElementById('perf-body').innerHTML=pts.map(p=>`<tr><td>${p.id}</td><td>${p.lp+(ns&&(p.lp===25||p.lp===75)?'*':'')}</td><td>${f2(p.c)}</td><td>${f2(p.p)}</td><td>${f3(p.cop)}</td><td>${fD(p.rla)}</td><td>${fF(p.f)}</td><td>${f2(p.tin)}</td><td>${f2(p.tout)}</td><td>${f2(p.pd)}</td><td>${f2(p.amb)}</td></tr>`).join('');
-    document.getElementById('elevated-hdr').style.display=con==='BEE'?'block':'none';
-    document.getElementById('elevated-section').style.display=con==='BEE'?'table':'none';
-    document.getElementById('elevated-perf-body').innerHTML=`<tr><td>1</td><td>100</td><td>${fD(d.Elev_C)}</td><td>${fD(d.Elev_P)}</td><td>${fD(d.Elev_COP)}</td><td>${fD(d.Elev_RLA)}</td><td>${fF(d.Elev_F)}</td><td>${f2(d.Elev_EI)}</td><td>${f2(d.Elev_EO)}</td><td>${f2(d.Elev_PD)}</td><td>${f2(d.Elev_AM)}</td></tr>`;
-    document.getElementById('physical-table').innerHTML=`<tr><td style="padding:0;vertical-align:top"><div style="padding:3px;background:#f2f2f2;text-align:center;font-weight:bold;border-bottom:1px solid #000">OPTION 1</div><table class="inner-table"><tr><td style="width:50%">LxWxH (mm):</td><td>${d.L1}x${d.W1}x${d.H1}</td></tr><tr><td>Shipping Weight:</td><td>${d.SW1} kg</td></tr><tr><td>Operating Weight:</td><td>${d.OW1} kg</td></tr><tr><td>Refrigerant Charge:</td><td>${d.RC1} kg</td></tr></table></td><td class="v-sep" style="padding:0;vertical-align:top"><div style="padding:3px;background:#f2f2f2;text-align:center;font-weight:bold;border-bottom:1px solid #000">OPTION 2</div><table class="inner-table"><tr><td style="width:50%">LxWxH (mm):</td><td>${d.L2}x${d.W2}x${d.H2}</td></tr><tr><td>Shipping Weight:</td><td>${d.SW2} kg</td></tr><tr><td>Operating Weight:</td><td>${d.OW2} kg</td></tr><tr><td>Refrigerant Charge:</td><td>${d.RC1} kg</td></tr></table></td></tr>`;
-    if(con==='BEE'&&(mod==='KAC011'||mod==='KAC022'))notes.innerText='* NOTE: Physically chiller cannot be unloaded at this condition. Rating are based on degradation factor and interpolation as per IS 16590:2023.';
-    else if(con==='BEE')notes.innerText='* ';else notes.innerText='';
-  } else {
-    const hp=hpData.find(x=>x.model===mod);if(!hp)return;
-    document.getElementById('chiller-sections').style.display='none';
-    document.getElementById('hp-sections').style.display='block';
-    document.getElementById('d-app-type').innerText='Commercial Heat Pump';
-    document.getElementById('d-tech').innerText=hp.comp.split(' ')[0]||'Scroll';
-    document.getElementById('d-model-name').innerText=hp.model;
-    document.getElementById('d-condition').innerText='User Specified';
-    document.getElementById('bmg-row').style.display='none';
-    document.getElementById('starter-row-ahri').style.display='none';
-    let l='-',w='-',h='-';
-    let ds=_v(hp.dim);
-    if(ds!=='-'){let pp=ds.replace(/×/g,'x').replace(/X/g,'x').split('x');if(pp.length>=3){l=pp[0].trim();w=pp[1].trim();h=pp[2].trim();}}
-    document.getElementById('hp-sections').innerHTML=`<table class="hp-table" style="margin-top:-1px;"><tr><th style="border-bottom:1px solid #000;width:33.3%">Compressor</th><th class="v-sep" style="border-bottom:1px solid #000;width:33.3%">Air Cooled Evaporator</th><th class="v-sep" style="border-bottom:1px solid #000;width:33.3%">Condenser</th></tr><tr><td style="padding:0;vertical-align:top"><table class="inner-table"><tr><td style="width:60%">Type</td><td>${_v(hp.comp)}</td></tr><tr><td>No. of Compressors</td><td>${_v(hp.compQty)}</td></tr><tr><td>Power Supply</td><td>${_v(hp.supply)}</td></tr><tr><td>Refrigerant</td><td>${_v(hp.ref)}</td></tr></table></td><td class="v-sep" style="padding:0;vertical-align:top"><table class="inner-table"><tr><td style="width:60%">Type</td><td>${_v(hp.evap)}</td></tr><tr><td>Fan Quantity</td><td>${_v(hp.fanQty)}</td></tr><tr><td>Noise Level (dB)</td><td>${_v(hp.noise)}</td></tr><tr><td>Fan Discharging</td><td>${_v(hp.fanDir)}</td></tr></table></td><td class="v-sep" style="padding:0;vertical-align:top"><table class="inner-table"><tr><td style="width:60%">Type Heat Exch.</td><td>${_v(hp.heatex)}</td></tr><tr><td>Throttling Device</td><td>${_v(hp.throttle)}</td></tr><tr><td>Water Flow (m³/h)</td><td>${_v(hp.flow)}</td></tr><tr><td>Rated Hot Water (L/H)</td><td>${_v(hp.hotWater)}</td></tr><tr><td>Rated Water Temp (°C)</td><td>${_v(hp.ratedTemp)}</td></tr><tr><td>Max Water Temp (°C)</td><td>${_v(hp.maxTemp)}</td></tr></table></td></tr></table><div class="section-header">HEAT PUMP SPECIFICATIONS</div><table class="hp-table"><tr><td class="label-cell">Heating Capacity (kW)</td><td>${_v(hp.cap)}</td><td class="label-cell v-sep">Input Power (kW)</td><td>${_v(hp.power)}</td></tr><tr><td class="label-cell">Power Supply</td><td>${_v(hp.supply)}</td><td class="label-cell v-sep">Max Power Input (kW)</td><td>${_v(hp.maxPower)}</td></tr><tr><td class="label-cell">COP</td><td>${_v(hp.cop)}</td><td class="label-cell v-sep">Current / RLA (A)</td><td>${_v(hp.current)}</td></tr><tr><td class="label-cell"></td><td></td><td class="label-cell v-sep">Max Current (A)</td><td>${_v(hp.maxCurrent)}</td></tr></table><div class="section-header">PHYSICAL DATA</div><table class="hp-table"><tr><td class="label-cell">Pipe Size</td><td>${_v(hp.pipe)}</td><td class="label-cell v-sep">Length (mm)</td><td>${l}</td></tr><tr><td class="label-cell">Weight (kg)</td><td>${_v(hp.weight)}</td><td class="label-cell v-sep">Width (mm)</td><td>${w}</td></tr><tr><td class="label-cell"></td><td></td><td class="label-cell v-sep">Height (mm)</td><td>${h}</td></tr></table>`;
-    notes.innerText='* All specifications are subject to change without prior notice based on continuous product development.';
-  }
+function goBack() {
+    document.getElementById('report-wrapper').style.display = 'none';
+    document.getElementById('selection-form').style.display = 'block';
 }
 
-function downloadPDF(){
-  const el=document.getElementById('report-content');
-  const c=document.getElementById('client').value||'Client';
-  const p=document.getElementById('project').value||'Project';
-  const a=document.getElementById('app-select').value;
-  const fn=`Kirloskar_${a}_${c}_${p}.pdf`.replace(/\s+/g,'_');
-  html2pdf().set({margin:[5,5,5,5],filename:fn,image:{type:'jpeg',quality:1},html2canvas:{scale:3,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(el).save();
+function generateReport() {
+    const app = document.getElementById('app-select').value;
+    const mod = document.getElementById('model-select').value;
+    const con = document.getElementById('cond-select').value;
+
+    document.getElementById('selection-form').style.display = 'none';
+    document.getElementById('report-wrapper').style.display = 'block';
+    document.getElementById('p-date').innerText = new Date().toLocaleDateString('en-GB') + ' ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
+    document.getElementById('d-client').innerText = document.getElementById('client').value || '—';
+    document.getElementById('d-project').innerText = document.getElementById('project').value || '—';
+    document.getElementById('d-incharge').innerText = document.getElementById('proj-incharge').value || '—';
+
+    let notes = document.getElementById('notes-area');
+
+    if (app === 'Chiller') {
+        document.getElementById('btn-pnid').style.display = 'none';
+        const d = chillerDB.find(x => x.Model === mod && x.Condition === con);
+        if(!d) return;
+
+        document.getElementById('chiller-sections').style.display = 'block';
+        document.getElementById('hp-sections').style.display = 'none';
+        
+        document.getElementById('d-app-type').innerText = 'Air Cooled Chiller';
+        document.getElementById('d-tech').innerText = 'Scroll';
+        document.getElementById('d-model-name').innerText = d.ModelName;
+        document.getElementById('d-condition').innerText = con;
+
+        const starLabel = (con === 'BEE') ? (BEE_STAR_LABELS[mod] || '3 Star') : '';
+        if (con === 'BEE') {
+            document.getElementById('d-bmg').innerText = starLabel.includes('2') ? 'BMGA2' : 'BMGA3';
+            document.getElementById('bmg-row').style.display = '';
+            document.getElementById('starter-row-ahri').style.display = 'none';
+        } else {
+            document.getElementById('bmg-row').style.display = 'none';
+            document.getElementById('starter-row-ahri').style.display = '';
+        }
+
+        if(con === 'AHRI') {
+            document.getElementById('d-rating-hdr').innerText = "Job Conditions in accordance with AHRI-551/591 (SI)";
+            document.getElementById('d-eff-hdr').innerText = "Part Load Data with AHRI-Relief";
+            document.getElementById('d-perf-hdr').innerText = "Performance Details At AHRI Relief Load Points";
+        } else {
+            document.getElementById('d-rating-hdr').innerText = "RATED PERFORMANCE AT STANDARD RATING CONDITIONS AS PER TABLE 1, IS 16590 : 2023";
+            document.getElementById('d-eff-hdr').innerText = "INDIAN SEASONAL ENERGY EFFICIENCY RATIO (ISEER) AS PER ANNEX C, IS 16590 : 2023";
+            document.getElementById('d-perf-hdr').innerText = "PERFORMANCE DETAILS";
+        }
+
+        document.getElementById('comp-data').innerHTML = `<tr><td>No. of quantity </td><td>${d.NumCompressors}</td></tr><tr><td>Hertz</td><td>50.0 Hz</td></tr><tr><td>Volts</td><td>415 V</td></tr><tr><td>Refrigerant</td><td>${d.Refrigerant}</td></tr>`;
+        document.getElementById('evap-data').innerHTML = `<tr><td>Flow (m³/h)</td><td>${fmtFlow(d.FlowDesign)}</td></tr><tr><td>Entering Water Temp (°C)</td><td>12.0</td></tr><tr><td>Leaving Water Temp (°C)</td><td>7.0</td></tr><tr><td>No. of Passes</td><td>${d.Passes}</td></tr><tr><td>Fouling Factor</td><td>${d.FF}</td></tr><tr><td>Pressure Drop (kPa)</td><td>${fmt2(d.PD100)}</td></tr><tr><td>Tube Material</td><td>Cu</td></tr>`;
+        document.getElementById('cond-data').innerHTML = `<tr><td>Ambient Temperature (°C)</td><td>${fmt2(d.AM100)}</td></tr><tr><td>No. of condenser Coils</td><td>${d.NumCoils}</td></tr><tr><td>No. of condenser Fans</td><td>${d.NumFans}</td></tr>`;
+
+        let rlaRows = '';[1,2,3,4].forEach(i => {
+            let val = d['CompRLA' + i];
+            let display = (val && val.trim() !== 'NA' && val.trim() !== '') ? fmtDynamic(val) : 'NA';
+            rlaRows += `<tr><td style="width:65%;">RLA Compressor ${i} (A)</td><td>${display}</td></tr>`;
+        });
+
+        document.getElementById('efficiency-table').innerHTML = `
+            <tr><td class="label-cell"> Capacity (kW)</td><td>${fmt2(d.C100)}</td><td class="label-cell v-sep">75% Load COP</td><td>${fmt3(d.COP75)}</td><td class="label-cell v-sep">Total RLA (A)</td><td style="text-align:right; padding-right:12px;">${fmtDynamic(d.RLA100)}</td></tr>
+            <tr><td class="label-cell">Power(kW)</td><td>${fmt2(d.P100)}</td><td class="label-cell v-sep">50% Load COP</td><td>${fmt3(d.COP50)}</td><td rowspan="3" colspan="2" class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table">${rlaRows}</table></td></tr>
+            <tr><td class="label-cell">COP (kW/kW)</td><td>${fmt3(d.COP100)}</td><td class="label-cell v-sep">25% Load COP</td><td>${fmt3(d.COP25)}</td></tr>
+            <tr><td class="label-cell">${con === 'BEE' ? 'ISEER' : 'IPLV'}</td><td>${fmt2(d.ResultVal)}</td><td class="label-cell v-sep">${con === 'BEE' ? 'BEE Star Rating' : ''}</td><td>${con === 'BEE' ? starLabel : ''}</td></tr>`;
+
+        const needsStar = (con === 'BEE' && (mod === 'KAC011' || mod === 'KAC022'));
+        const pts = [
+            {id:1, lp:100, c:d.C100, p:d.P100, cop:d.COP100, rla:d.RLA100, f:d.F100, tin:d.EI100, tout:d.EO100, pd:d.PD100, amb:d.AM100},
+            {id:2, lp:75, c:d.C75, p:d.P75, cop:d.COP75, rla:d.RLA75, f:d.F75, tin:d.EI75, tout:d.EO75, pd:d.PD75, amb:d.AM75},
+            {id:3, lp:50, c:d.C50, p:d.P50, cop:d.COP50, rla:d.RLA50, f:d.F50, tin:d.EI50, tout:d.EO50, pd:d.PD50, amb:d.AM50},
+            {id:4, lp:25, c:d.C25, p:d.P25, cop:d.COP25, rla:d.RLA25, f:d.F25, tin:d.EI25, tout:d.EO25, pd:d.PD25, amb:d.AM25}
+        ];
+
+        let phtml = "";
+        pts.forEach(p => {
+            let lpDisplay = p.lp;
+            if (needsStar && (p.lp === 25 || p.lp === 75)) lpDisplay += "*";
+            phtml += `<tr><td>${p.id}</td><td>${lpDisplay}</td><td>${fmt2(p.c)}</td><td>${fmt2(p.p)}</td><td>${fmt3(p.cop)}</td><td>${fmtDynamic(p.rla)}</td><td>${fmtFlow(p.f)}</td><td>${fmt2(p.tin)}</td><td>${fmt2(p.tout)}</td><td>${fmt2(p.pd)}</td><td>${fmt2(p.amb)}</td></tr>`;
+        });
+        document.getElementById('perf-body').innerHTML = phtml;
+
+        const elevDisplay = (con === 'BEE') ? 'table' : 'none';
+        document.getElementById('elevated-hdr').style.display = (con === 'BEE') ? 'block' : 'none';
+        document.getElementById('elevated-section').style.display = elevDisplay;
+
+        document.getElementById('elevated-perf-body').innerHTML = `<tr><td>1</td><td>100</td><td>${fmtDynamic(d.Elev_C)}</td><td>${fmtDynamic(d.Elev_P)}</td><td>${fmtDynamic(d.Elev_COP)}</td><td>${fmtDynamic(d.Elev_RLA)}</td><td>${fmtFlow(d.Elev_F)}</td><td>${fmt2(d.Elev_EI)}</td><td>${fmt2(d.Elev_EO)}</td><td>${fmt2(d.Elev_PD)}</td><td>${fmt2(d.Elev_AM)}</td></tr>`;
+
+        document.getElementById('physical-table').innerHTML = `<tr>
+            <td style="padding:0; vertical-align:top;"><div style="padding:3px; background:#f2f2f2; text-align:center; font-weight:bold; border-bottom:1px solid var(--border);">OPTION 1</div><table class="inner-table"><tr><td style="width:50%">LxWxH (mm):</td><td>${d.L1}x${d.W1}x${d.H1}</td></tr><tr><td>Shipping Weight:</td><td>${d.SW1} kg</td></tr><tr><td>Operating Weight:</td><td>${d.OW1} kg</td></tr><tr><td>Refrigerant Charge:</td><td>${d.RC1} kg</td></tr></table></td>
+            <td class="v-sep" style="padding:0; vertical-align:top;"><div style="padding:3px; background:#f2f2f2; text-align:center; font-weight:bold; border-bottom:1px solid var(--border);">OPTION 2</div><table class="inner-table"><tr><td style="width:50%">LxWxH (mm):</td><td>${d.L2}x${d.W2}x${d.H2}</td></tr><tr><td>Shipping Weight:</td><td>${d.SW2} kg</td></tr><tr><td>Operating Weight:</td><td>${d.OW2} kg</td></tr><tr><td>Refrigerant Charge:</td><td>${d.RC1} kg</td></tr></table></td>
+        </tr>`;
+
+        if (con === 'BEE' && (mod === 'KAC011' || mod === 'KAC022')) {
+            notes.innerText = "* NOTE: Physically chiller cannot be unloaded at this condition.Rating are based on degradation factor and interpolation as per IS 16590:2023.";
+        } else if (con === 'BEE') { notes.innerText = "* "; } else { notes.innerText = ""; }
+
+    } else {
+        document.getElementById('btn-pnid').style.display = 'block';
+
+        const hp = hpData.find(x => x.model === mod);
+        if(!hp) return;
+
+        document.getElementById('chiller-sections').style.display = 'none';
+        document.getElementById('hp-sections').style.display = 'block';
+
+        document.getElementById('d-app-type').innerText = 'Commercial Heat Pump';
+        document.getElementById('d-tech').innerText = 'Air to Water';
+        document.getElementById('d-model-name').innerText = hp.model;
+        document.getElementById('d-condition').innerText = 'User Specified';
+        document.getElementById('bmg-row').style.display = 'none';
+        document.getElementById('starter-row-ahri').style.display = 'none';
+
+        let l = '-', w = '-', h = '-';
+        let dimStr = _v(hp.dim);
+        if(dimStr !== '-') {
+            let parts = dimStr.replace(/×/g, 'x').replace(/X/g, 'x').split('x');
+            if(parts.length >= 3) { l = parts[0].trim(); w = parts[1].trim(); h = parts[2].trim(); }
+        }
+
+        let compStr = _v(hp.comp);
+        let compType = '-'; let compMake = '-';
+        if (compStr !== '-') {
+            let parts = compStr.split('(');
+            compType = parts[0].trim();
+            if (parts[1]) compMake = parts[1].replace(')', '').trim();
+        }
+
+        let condInlet = '-'; let condOutlet = '-';
+        if (hp.model.includes('KSE-AH')) { condInlet = '25'; condOutlet = '55'; } 
+        else if (hp.model.includes('KSE-SP')) { condInlet = '26'; condOutlet = '28'; }
+
+        document.getElementById('hp-sections').innerHTML = `
+            <table class="hp-table" style="margin-top: -1px; width: 100%; table-layout: fixed;">
+                <colgroup><col style="width:22%;"><col style="width:22%;"><col style="width:22%;"><col style="width:28%;"></colgroup>
+                <tr>
+                    <th style="background-color: var(--navy); color: white; border-bottom:1px solid var(--border);">specification</th>
+                    <th class="v-sep" style="background-color: var(--navy); color: white; border-bottom:1px solid var(--border);">Compressor</th>
+                    <th class="v-sep" style="background-color: var(--navy); color: white; border-bottom:1px solid var(--border);">Evaporator</th>
+                    <th class="v-sep" style="background-color: var(--navy); color: white; border-bottom:1px solid var(--border);">Condenser</th>
+                </tr>
+                <tr>
+                    <td style="padding:0; vertical-align:top;"><table class="inner-table"><tr><td>Power Supply</td><td class="wrap-text" style="text-align: right;">${_v(hp.supply)}</td></tr><tr><td class="label-cell">Throttling Device</td><td>${_v(hp.throttle)}</td></tr><tr><td>Refrigerant</td><td>${_v(hp.ref)}</td></tr></table></td>
+                    <td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table"><tr><td style="width:45%">Type</td><td>${compType}</td></tr><tr><td>Make</td><td>${compMake}</td></tr><tr><td>No. of Compressors</td><td>${_v(hp.compQty)}</td></tr></table></td>
+                    <td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table"><tr><td style="width:35%">Coil Type</td><td class="wrap-text" style="text-align: right;">${_v(hp.evap)}</td></tr><tr><td>Fan Quantity</td><td>${_v(hp.fanQty)}</td></tr><tr><td>Fan Direction</td><td>${_v(hp.fanDir)}</td></tr></table></td>
+                    <td class="v-sep" style="padding:0; vertical-align:top;"><table class="inner-table"><tr><td style="width:25%;">Type</td><td style="text-align: right; white-space: nowrap; font-size: 8.5px;">${_v(hp.heatex)}</td></tr><tr><td style="white-space: nowrap;">Inlet Temp (°C)</td><td>${condInlet}</td></tr><tr><td style="white-space: nowrap;">Outlet Temp (°C)</td><td>${condOutlet}</td></tr><tr><td style="white-space: nowrap;">Water Flow (m³/h)</td><td>${_v(hp.flow)}</td></tr><tr><td style="white-space: nowrap;">Hot Water (L/H)</td><td>${_v(hp.hotWater)}</td></tr><tr><td style="white-space: nowrap;">Water Temp (°C)</td><td>${_v(hp.ratedTemp)}</td></tr></table></td>
+                </tr>
+            </table>
+
+            <div class="section-header">HEAT PUMP SPECIFICATIONS</div>
+            <table class="hp-table" style="width: 100%; table-layout: fixed;">
+                <colgroup><col style="width:22%;"><col style="width:22%;"><col style="width:22%;"><col style="width:28%;"></colgroup>
+                <tr><td class="label-cell">Heating Cap. (kW)</td><td class="v-sep">${_v(hp.cap)}</td><td class="label-cell v-sep">Current / RLA (A)</td><td class="v-sep">${_v(hp.current)}</td></tr>
+                <tr><td class="label-cell">Input Power (kW)</td><td class="v-sep">${_v(hp.power)}</td><td class="label-cell v-sep">Max Power Input (kW)</td><td class="v-sep">${_v(hp.maxPower)}</td></tr>
+                <tr><td class="label-cell">COP (kW/kW)</td><td class="v-sep">${_v(hp.cop)}</td><td class="label-cell v-sep">Max Current (A)</td><td class="v-sep">${_v(hp.maxCurrent)}</td></tr>
+            </table>
+
+            <div class="section-header">PHYSICAL DATA</div>
+            <table class="hp-table" style="width: 100%; table-layout: fixed;">
+                <colgroup><col style="width:22%;"><col style="width:22%;"><col style="width:22%;"><col style="width:28%;"></colgroup>
+                <tr><td class="label-cell">Pipe Size</td><td class="v-sep">${_v(hp.pipe)}</td><td class="label-cell v-sep">Length (mm)</td><td class="v-sep">${l}</td></tr>
+                <tr><td class="label-cell">Weight (kg)</td><td class="v-sep">${_v(hp.weight)}</td><td class="label-cell v-sep">Width (mm)</td><td class="v-sep">${w}</td></tr>
+                <tr><td class="label-cell">Noise Level (dB)</td><td class="v-sep">${_v(hp.noise)}</td><td class="label-cell v-sep">Height (mm)</td><td class="v-sep">${h}</td></tr>
+            </table>
+        `;
+        
+        if (hp.model.includes('KSE-AH')) {
+            notes.innerText = "* KEY SPECIFICATIONS: Silent operation, Less maintenance, Available EVI";
+        } else if (hp.model.includes('KSE-SP')) {
+            notes.innerText = "* KEY SPECIFICATIONS: Energy saving, WiFi control available in EVI";
+        } else {
+            notes.innerText = "";
+        }
+    }
+}
+
+function downloadPDF() {
+    const element = document.getElementById('report-content');
+    const clientStr = document.getElementById('client').value || 'Client';
+    const projStr = document.getElementById('project').value || 'Project';
+    const appStr = document.getElementById('app-select').value;
+    const filename = `Kirloskar_${appStr}_Report_${clientStr}_${projStr}.pdf`.replace(/\s+/g, '_');
+
+    const opt = {
+        margin:[5, 5, 5, 5], 
+        filename: filename,
+        image: { type: 'jpeg', quality: 1.0 },
+        html2canvas: { scale: 3, useCORS: true }, 
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+}
+
+// --- P&ID MODAL LOGIC ---
+function openPnIdModal() { document.getElementById('pnid-modal').style.display = 'block'; }
+function closePnIdModal() { document.getElementById('pnid-modal').style.display = 'none'; }
+
+window.onclick = function(event) {
+    let modal1 = document.getElementById('pnid-modal');
+    let modal2 = document.getElementById('admin-modal');
+    if (event.target == modal1) modal1.style.display = "none";
+    if (event.target == modal2) modal2.style.display = "none";
+}
+
+function downloadPnIdImage() {
+    const imgSource = document.getElementById('pnid-image').src;
+    const link = document.createElement('a');
+    link.href = imgSource;
+    link.download = "P_and_ID_Diagram.png"; 
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 </script>
 </body>
